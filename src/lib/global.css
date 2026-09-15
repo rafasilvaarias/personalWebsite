@@ -1,0 +1,216 @@
+@font-face {
+  font-family: 'prSans';
+  src: url('/fonts/HedvigLettersSans-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'prSerif';
+  src: url('/fonts/HedvigLettersSerif_14pt-Regular.ttf') format('truetype');
+}
+
+:root {
+    --prBlack: #231F20;
+    --prBlack2: #626366;
+    --prBlack3: #939598;
+    --prWhite: #EBEBEC;
+    --prBlue: #0000FF;
+    --prYellow: #FFE372;
+
+    --marL : 4.75rem;
+    --marM : 4rem;
+    --marS : 2rem;
+    --marXS : 1rem;
+
+    --tSize1: 1rem;
+    --tSize2: 1.625rem;
+    --tSize3: 2.25rem;
+    --tSize4: 2.875rem;
+
+    --vQuickTransition: 0.1s;
+    --quickTransition: 0.2s;
+
+    --grid: 4;
+    --gridSize: calc((
+            (100vw - (var(--marS) * 2)) 
+            - (var(--marS)*(var(--grid) - 1))
+        ) 
+        / var(--grid));
+    --isMobile: 0;
+    --mobileBreakingPoint: 55rem;
+
+    --headerHeight: 3.5rem;
+    --fullHeaderHeight: calc(3.5rem + 0.5px);
+
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and old Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, newer Edge (WebKit/Blink) */
+}
+
+@media (max-width: 68rem) {
+    :root{
+        --grid: 3;
+    }
+}
+
+@media (max-width: 55rem) {
+    :root{
+        --isMobile: 1;
+    }
+
+    .hideOnMobile{
+        display: none !important;
+    }
+}
+
+@media (min-width: 55rem) {
+    .hideOnDesktop{
+        display: none !important;
+    }
+}
+
+html,
+body {
+  font-family: 'prSans', sans-serif;
+  background-color: var(--prWhite);
+  color: var(--prBlack);
+  font-size: 1em;
+  width: 100%;
+  overflow-x: clip;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+li {
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+    font-weight: normal;
+    text-decoration: none;
+    line-height: 1.4;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+button {
+	all: unset;
+	cursor: pointer;
+}
+
+.tSize1 {
+    font-size: 1rem;
+}
+
+.tSize2 {
+    font-size: 1.625rem;
+}
+
+.tSize3 {
+    font-size: 2.25rem;
+}
+
+.tSize4 {
+    font-size: 2.875rem;
+}
+
+.serif {
+    font-family: 'prSerif', serif;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.textCenter {
+  text-align: center;
+}
+
+.textLeft {
+  text-align: left;
+}
+
+.textRight {
+  text-align: right;
+}
+
+.black {
+    color: var(--prBlack);
+}
+
+.black2 {
+    color: var(--prBlack2);
+}
+
+.black3 {
+    color: var(--prBlack3);
+}
+
+.white {
+    color: var(--prWhite);
+}
+
+.blue {
+    color: var(--prBlue);
+}
+
+.yellow {
+    color: var(--prYellow);
+}
+
+.dropShadow {
+    filter: drop-shadow(12px 12px 27px rgba(0, 0, 0, 0.125));
+}
+
+hr {
+    width:100%;
+    height:0.5px;
+    border-width:0;
+    color:var(--prBlack3);
+    background-color:var(--prBlack3);
+    margin: 0;
+}
+
+.help{
+    cursor: help;
+}
+
+.resize{
+    cursor: ne-resize;
+}
+
+.pointer{
+    cursor: pointer;
+}
+
+::selection {
+  background-color: var(--prBlue);
+  color: var(--prWhite);
+}
