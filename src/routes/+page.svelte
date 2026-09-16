@@ -269,7 +269,7 @@
                 src="/photos/homepagePhrase/fish.jpg" alt="Ocean Sunfish" class="dropShadow help" 
             />
             <img 
-                style="--tx: -150%; --ty: -100%; --rot: 5deg; --s: 40%; top: calc(50% + {scrollPercent * -15}%"
+                style="--tx: -150%; --ty: -110%; --rot: 5deg; --s: 40%; top: calc(50% + {scrollPercent * -15}%"
                 src="/photos/homepagePhrase/scuba.jpg" alt="Scuba Diver" class="dropShadow help" />
             <p class="tSize3 textCenter">Creative work comes from <a href="https://en.wikipedia.org/wiki/Catching_the_Big_Fish" target="_blank" class="serif blue resize"> diving in one's pool of ideas</a>. My goal is an ever-expanding pool, with room to dive into any discipline. Like Brian Jones, <a href="/about" class="blue">I</a> was born to swim.</p>
         </div>
@@ -567,6 +567,12 @@
                 width: 10rem;
             }
         }
+    }
+
+    @media (max-width: 55rem) {
+        #phrase { p {
+            font-size: var(--tSize2);
+        }}
     }
 
     @keyframes slideIn {
