@@ -1,6 +1,8 @@
 #header Shift APPens; 2025/2026
 
 #phrase Pixelization, ASCII, and computer vision inspired us. So I built a web tool that transforms images and video with these algorithms. That tool became the visual identity.
+
+![saBanner.jpg]
 # Team
 This took a team of five. I was lead designer. Pedro Anjinho, Leonor Brandão, and Nuno Pinto helped me define the visual identity. Ana Feu joined later to apply it across digital and physical surfaces. I built the web tool. Nuno and Anjinho designed [the website](https://shiftappens.com/) (not shown here since I wasn't involved, but it was an enormous endeavor on its own). The rest was split across the team.
 
@@ -52,4 +54,4 @@ Still, this project is more interesting for its process than its output. For me,
 
 Beyond the wow factor, building a tool for one specific job speeds things up (I can't imagine how long one of [these posts](/project/shiftAPPens#social-media) would take to do manually). It also invites exploration within its own limits, and throws up unexpected results when going past them.
 # Try the tool
-I originally intended the web tool to be used in a small competition inside the hackathon. That never happened, so the UI is rough and clunky because it was made for the design team only. You'll figure it out. Try it [here](http://www.idi.rafasilvaarias.com).
+I originally intended the web tool to be used in a small competition inside the hackathon. That never happened, so the UI is rough and clunky because it was made for the design team only. You'll figure it out. Try it [here](https://idi.rafasilvaarias.com).

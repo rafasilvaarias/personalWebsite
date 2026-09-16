@@ -2,8 +2,7 @@
     import { disableScrollHandling } from '$app/navigation';
     import { ui } from '$lib/state.svelte.js';
     import {progressChar, getProgressChar} from '$lib/utils';
-    import InfinityCircles from './infinityCircles.svelte';
-    import { onMount, onDestroy } from 'svelte';
+    import { onMount} from 'svelte';
   
 
     // #region Projects
@@ -201,8 +200,8 @@
         introKey = introIndex;
 
         const id = setInterval(() => {
-            if (seconds >= 3) {
-                introIndex += 1;
+            if (seconds >= 2) {
+                downIntroIndex();
             } else {
                 seconds += 0.2;
             }
@@ -212,19 +211,36 @@
     });
 
     // #endregion
+
+    // #region intro wheel control
+    let wheelLocked = $state(false);
+
+    function handleIntroWheel(e: WheelEvent) {
+        if (introIndex === 4 || wheelLocked) return;
+
+        wheelLocked = true;
+        setTimeout(() => (wheelLocked = false), 400); // debounce so one scroll tick = one step
+
+        if (e.deltaY > 0) {
+            downIntroIndex();
+        } else if (e.deltaY < 0) {
+            upIntroIndex();
+        }
+    }
+    // #endregion
 </script>
 
-<svelte:window bind:scrollY bind:innerHeight/>
+<svelte:window bind:scrollY bind:innerHeight onwheel={handleIntroWheel}/>
 
 <main>
     <div id="intro">
         {#if introInitialized}
             {#key introIndex}
-                <p class="tSize3 textRight appear">{@html introPhrases[introIndex][0]}</p>
+                <p class="introText tSize3 textRight appear">{@html introPhrases[introIndex][0]}</p>
             {/key}
             <img id="token" src="/photos/token.webp" alt="gold token animation">
             {#key introKey}
-                <p class="tSize3 textLeft appear">{@html introPhrases[introIndex][1]}</p>
+                <p class="introText tSize3 textLeft appear">{@html introPhrases[introIndex][1]}</p>
             {/key}
 
             {#if introIndex != 4}
@@ -234,7 +250,7 @@
                 </div>
                 <div aria-hidden="true" id="progressBarWrapper" class="appear">
                     {#each Array(introPhrases.length - 1) as _, index}
-                        <p aria-hidden="true" class="blue">{introIndex > index ? "█" : introIndex == index ? getProgressChar(seconds/3) : "░"}</p>
+                        <p aria-hidden="true" class="blue">{introIndex > index ? "█" : introIndex == index ? getProgressChar(seconds/2) : "░"}</p>
                     {/each}
                 </div>
             {:else}
@@ -255,7 +271,7 @@
             <img 
                 style="--tx: -150%; --ty: -100%; --rot: 5deg; --s: 40%; top: calc(50% + {scrollPercent * -15}%"
                 src="/photos/homepagePhrase/scuba.jpg" alt="Scuba Diver" class="dropShadow help" />
-            <p class="tSize3 textCenter">Creative work comes from <a href="https://en.wikipedia.org/wiki/Catching_the_Big_Fish" target="_blank" class="serif blue resize"> diving in one's pool of ideas</a>. Like Brian Jones, <a href="/about" class="blue">I</a> was born to swim. </p>
+            <p class="tSize3 textCenter">Creative work comes from <a href="https://en.wikipedia.org/wiki/Catching_the_Big_Fish" target="_blank" class="serif blue resize"> diving in one's pool of ideas</a>. My goal is an ever-expanding pool, with room to dive into any discipline. Like Brian Jones, <a href="/about" class="blue">I</a> was born to swim.</p>
         </div>
         <hr>
         <div id="projectsWrapper" bind:this={projectsRef}>
@@ -336,7 +352,7 @@
     }
 
     #intro {
-        background: radial-gradient(circle at top, var(--prYellow) 0%, transparent 70%);
+        background: radial-gradient(ellipse 100svw 100svh at top, var(--prYellow) 0%, transparent 100%);
         display: inline-flex;
         gap: var(--marM);
         flex-direction: row;
@@ -541,13 +557,14 @@
     @media (max-width: 62rem) {
         #intro {
             flex-direction: column;
-            p {
+            gap: var(--marS);
+            .introText {
                 text-align: center;
-                z-index: 1000;
+                font-size: var(--tSize2);
             }
 
             #token{
-                width: 15rem;
+                width: 10rem;
             }
         }
     }

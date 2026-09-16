@@ -6,7 +6,7 @@
         { message: "born in Porto, Portugal", time: "sep 2003" },
         { message: 'enrolled in classical piano @ <a class="resize" target="_blank" href="https://www.emos.pt/">EMOS</a>', time: "2008" },
         { message: 'left classical piano for jazz guitar and piano @ <a class="resize" target="_blank" href="https://valentim.pt/conteudos/cursos">Valentim de Carvalho</a>', time: "sep 2018" },
-        { message: "discovered björk", time: "aug 2019" },
+        { message: "discovered Björk", time: "aug 2019" },
         { message: "stopped studying music formally", time: "jul 2020" },
         { message: 'enrolled in bachelor\'s in <a class="resize" target="_blank" href="https://www.uc.pt/en/fctuc/dei/education/bachelors/ldm/">design and multimedia</a> @ FCTUC, UC', time: "sep 2021" },
         { message: 'interned as a designer @ <a class="resize" target="_blank" href="https://www.uc.pt/desporto/">Desporto UC</a>, mildly disliked it', time: "oct 2022" },

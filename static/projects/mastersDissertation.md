@@ -1,7 +1,9 @@
 #header Master's Dissertation; Current
 
 #phrase I'm building generative music (non-AI) that lives on the web. Not just to play the music, to distribute it too. This the subject of the dissertation of my master's in [Computer Music and Sound Design](https://www.uc.pt/en/fctuc/dei/education/masters/master-in-computer-music-and-sound-design/) @ FCTUC, UC.
-# Why?
+
+![demo.gif;100]
+# Why
 
 #logicChain Media advances change playback; The web has unique playback features; Streaming platforms ignore it; We should explore them instead.
 
@@ -15,7 +17,5 @@ The platform's design will follow expected interactions, or break them, whicheve
 The music is semi-stochastic. [Seeds](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) make each playthrough replayable, but never identical. Macro parameters like project duration shift between plays. So do small things like a rhythmic fill, a melodic turn. 
 
 # Demo
-Try an early demo [here](https://www.md.rafasilvaarias.com). It's my first test of making music with the tools I've built. I'm not contempt with the result, I think the aesthetic of the piece is not matching its environment. The final artwork will be different. The platform itself is working well.
+Try an early demo [here](https://md.rafasilvaarias.com/listen). It's my first test of making music with the tools I've built. I'm not contempt with the result, I think the aesthetic of the piece is not matching its environment. The final artwork will be different. The platform itself is working well.
 
-#endDiv
-![demo.gif;100]

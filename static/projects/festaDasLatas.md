@@ -1,6 +1,9 @@
 #header Festa das Latas; 2024
 
+
 #phrase Zero supervision, total creative freedom, and 30€. We used all to design a festival identity out of destruction.
+
+![flBanner.jpg]
 
 # Team
 
@@ -53,7 +56,6 @@ Making physical objects was the most rewarding part. We got to design huge billb
 
 ![flMandB03.jpg;100]
 #gallery +[verticalBillboards.mp4;1]; ![flMandB05.jpg; 2]
-![flMandB01.jpg;100]
 
 #gallery ![flMandB02.jpg;2]
 ![flMandB04.jpg;100]

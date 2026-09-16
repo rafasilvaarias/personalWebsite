@@ -2,6 +2,8 @@
 
 #phrase One middle man was doing the work of thirty people. I designed and developed a web platform to fix it.
 
++[reseWebsite.mp4]
+
 # Note
 This article covers a web platform I designed and built solo for [RESE](https://radiorese.pt/). I also designed its visual identity, so I've added that at the end, in the last section.
 
@@ -52,10 +54,6 @@ You can copy last week's schedule and adjust it, since the show-per-hour structu
 
 This turned an hour of weekly work into a few clicks. And scheduling a show now publishes it straight to the website. The .csv files are gone.
 
-#endDiv
-
-+[reseWebsite.mp4]
-
 # Updates
 
 The database can hold far more than it does today. Right now, the public site only shows the live stream and the schedule. Two updates are planned.
@@ -79,7 +77,7 @@ The identity had one goal: look proudly online-only. People kept assuming RESE w
 
 #startDiv
 
-I built the identity alone at first. [Bruno Carril](https://www.instagram.com/_opiaet/) and Matilde Couto later rebuilt its Instagram presence. The first three images below show the old version; the last three show the new one.
+I built the identity alone at first. [Bruno Carril](https://www.instagram.com/_opiaet/) and Matilde Couto later entirely rebuilt its Instagram presence. The first three images below show the old version; the last three show the new one.
 
 #endDiv
 #gallery ![reseOldPost1.jpg; 1]; ![reseOldPost2.jpg; 1]; ![reseOldPost3.jpg; 1]

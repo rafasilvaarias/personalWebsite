@@ -60,6 +60,7 @@
 			</ul>
 		</nav>
 		<ul id="externalLinks">
+			<li><a id="CVLink" href="/CV.pdf" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>CV</a></li>
 			<li><a href="mailto:arias.rafael@outlook.pt" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>Email</a></li>
 			<li><a href="https://www.linkedin.com/in/rafasilvaarias/" target="_blank" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>LinkedIn</a></li>
 			<li><a href="https://github.com/rafasilvaarias" target="_blank" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>GitHub</a></li>
@@ -76,7 +77,7 @@
 		margin: 0;
         width: 100%;
         min-height: 100svh;
-		background: radial-gradient(circle at bottom, var(--prYellow) 0%, transparent 80%);
+		background: radial-gradient(ellipse 100svw 100svh at bottom, var(--prYellow) 0%, transparent 100%);
 		padding: var(--marS);
 
 		display:flex;
@@ -131,6 +132,8 @@
 				> li {
 					height: 1.85rem;
 
+					
+
 					a{
 						display: flex;
 						flex-direction: row;
@@ -166,15 +169,40 @@
 							transform: rotate(0deg);
 					}}
 				}
+
 			}
 
-			#externalLinks { li{ a{ img{
-				transform: rotate(150deg);
-			}}}}
+			#externalLinks { 
+				li{ 
+					a{ 
+						img{
+							transform: rotate(150deg);
+						}
+					}
 
-			#externalLinks { li{ a:hover{ img{
-				transform: rotate(135deg);
-			}}}}
+					#CVLink { 
+						img{
+							transform: rotate(-75deg);
+						}
+					}
+				}
+			}
+
+			#externalLinks { 
+				li{ 
+					a:hover{ 
+						img{
+							transform: rotate(135deg);
+						}
+					}
+
+					#CVLink:hover{ 
+						img{
+							transform: rotate(-90deg);
+						}
+					}
+				}
+			}
 
 			> nav, > ul {
 				width: var(--gridSize);

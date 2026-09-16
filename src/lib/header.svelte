@@ -84,8 +84,14 @@
 }
 
 @media (max-width: 55rem) {
-    .headerWrapper { .header { #infoDiv {
+    .headerWrapper { .header { 
+        gap: 0px;
+        #buttonDiv, #infoDiv {
+            width: 100%;
+        }
+        #infoDiv {
         justify-content: right;
+        gap: 0px;
     }}}
 }
 </style>
