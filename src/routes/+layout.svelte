@@ -60,7 +60,7 @@
 			</ul>
 		</nav>
 		<ul id="externalLinks">
-			<li><a id="CVLink" href="/CV.pdf" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>CV</a></li>
+			<li><a id="CVLink" href="/CV.pdf" target="_blank" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>CV</a></li>
 			<li><a href="mailto:arias.rafael@outlook.pt" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>Email</a></li>
 			<li><a href="https://www.linkedin.com/in/rafasilvaarias/" target="_blank" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>LinkedIn</a></li>
 			<li><a href="https://github.com/rafasilvaarias" target="_blank" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>GitHub</a></li>

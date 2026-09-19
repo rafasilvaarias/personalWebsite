@@ -22,13 +22,18 @@
         projectsBottom = projectsHeight + projectsTop;
     });
 
-    let hoveredProject : null | number = $state(null);
+    let hoveredProject = $state(0);
     let progressBar = $state(0);
+    let inProjectsSection = $state(false);
+
+    $effect(() => {
+        inProjectsSection = scrollY >= projectsTop && scrollY <= projectsBottom;
+    });
 
     $effect(() => {
         hoveredProject = 
         scrollY < projectsTop || projectsHeight <= 0 ?
-        null :
+        0 :
         Math.max(0, Math.min(Math.floor(
             (scrollY - projectsTop)
             / (projectsHeight / 4)
@@ -81,7 +86,7 @@
             year: "2024",
             phrase: "A <span class='serif'>30€ budget visual identity </span> for a 25000 people festival",
             photo: '/photos/homepageTokens/festaDasLatasToken.png',
-            photoSize: [-80, 10, 60]
+            photoSize: [-90, 10, 60]
 
         },
         
@@ -250,7 +255,7 @@
                 </div>
                 <div aria-hidden="true" id="progressBarWrapper" class="appear">
                     {#each Array(introPhrases.length - 1) as _, index}
-                        <p aria-hidden="true" class="blue">{introIndex > index ? "█" : introIndex == index ? getProgressChar(seconds/2) : "░"}</p>
+                        <p aria-hidden="true" class="blue">{introIndex > index ? "███" : introIndex == index ? getProgressChar(seconds/2) : "░░░"}</p>
                     {/each}
                 </div>
             {:else}
@@ -271,67 +276,62 @@
             <img 
                 style="--tx: -150%; --ty: -110%; --rot: 5deg; --s: 40%; top: calc(50% + {scrollPercent * -15}%"
                 src="/photos/homepagePhrase/scuba.jpg" alt="Scuba Diver" class="dropShadow help" />
-            <p class="tSize3 textCenter">Creative work comes from <a href="https://en.wikipedia.org/wiki/Catching_the_Big_Fish" target="_blank" class="serif blue resize"> diving in one's pool of ideas</a>. My goal is an ever-expanding pool, with room to dive into any discipline. Like Brian Jones, <a href="/about" class="blue">I</a> was born to swim.</p>
+            <p class="tSize3 textCenter">Creative work comes from <a href="https://en.wikipedia.org/wiki/Catching_the_Big_Fish" target="_blank" class="serif blue resize"> diving in one's pool of ideas</a>. My direction is an ever-expanding pool, with room to dive into any discipline. Like Brian Jones, <a href="/about" class="blue">I</a> was born to swim.</p>
         </div>
         <hr>
         <div id="projectsWrapper" bind:this={projectsRef}>
             <div id="projects">
                 <h1 class={ui.isMobile ? "tSize1 textCenter" : "tSize2 serif textCenter"}>Projects (Selected)</h1>
                 {#if hoveredProject !== null}
-                    <h2 class="tSize2 textCenter hideOnDesktop"><a href={projectLinks[hoveredProject].link}>{projectLinks[hoveredProject].name}</a></h2>
+                    <h2 class="tSize2 textCenter hideOnDesktop serif"><a href={projectLinks[hoveredProject].link}>{projectLinks[hoveredProject].name}</a></h2>
                 {/if}
                 <div id="projectsList" class="hideOnMobile">
                     <ul>
                         {#each projectLinks as project, index}
                             <li class={hoveredProject === index ? 'hovered' : ''}>
                                 <a href={project.link} onmouseenter={() => scrollTo({ top: -1 + projectsTop + (projectsHeight * (index + 1) / 4)})} >
-                                    <div class="progressBar" role="progressbar"
-                                        aria-valuenow={index === hoveredProject ? progressBar : 0}
-                                        aria-valuemin="0" aria-valuemax="100" aria-label="Upload progress">
-                                        <span aria-hidden="true" class="blue">
-                                            {index === hoveredProject ? getProgressChar(progressBar) : "░░░"}
-                                        </span>
-                                    </div>
+                                    <img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>
                                     <h2>{project.name}</h2>
                                 </a>
                             </li>
                         {/each}
                     </ul>
                     <ul class="black3">
-                        {#each hoveredProject !== null ? Array(hoveredProject) : [] as _}
+                        {#each Array(hoveredProject) as _}
                             <li></li>
                         {/each}
-                        {#each hoveredProject !== null ? projectLinks[hoveredProject].characteristics : [] as characteristic}
+                        {#each projectLinks[hoveredProject].characteristics as characteristic}
                             <li>{characteristic}</li>
                         {/each}
                     </ul>
                     <ul class="black3">
-                        {#each hoveredProject !== null ? Array(hoveredProject) : [] as _}
+                        {#each Array(hoveredProject) as _}
                             <li></li>
                         {/each}
-                        <li>{hoveredProject !== null ? projectLinks[hoveredProject].year : ''}</li>
+                        <li>{projectLinks[hoveredProject].year}</li>
                     </ul>
                 </div>
 
                 <div id="projectPhrase">
-                    {#if hoveredProject !== null}
-                        <h3 class={ui.isMobile ? "tSize3" : "tSize4"}><a href={projectLinks[hoveredProject].link}>{@html projectLinks[hoveredProject].phrase}</a></h3>
-                    {/if}
+                    <h3 class={ui.isMobile ? "tSize3" : "tSize4"}><a href={projectLinks[hoveredProject].link}>{@html projectLinks[hoveredProject].phrase}</a></h3>
+                    <img aria-hidden="true" alt="pointing hand" src="/icons/pointingHand.svg"/>
                 </div>
 
-                <p id="progressBar" class="blue hideOnDesktop">{getProgressChar(progressBar)}</p>
+                <div id="progressBar" class={inProjectsSection ? "" : "hidden"}>
+                    {#each projectLinks as project, index}
+                        <p class="blue">{index === hoveredProject ? getProgressChar(progressBar) : hoveredProject > index ? "███" : "░░░"}</p>
+                    {/each}
+                </div>
 
-                {#if hoveredProject !== null}
-                    {#key hoveredProject}
-                        <img 
-                            class="dropShadow help"
-                            id="projectToken"
-                            src={projectLinks[hoveredProject].photo} 
-                            alt={projectLinks[hoveredProject].name + " Photo"} 
-                            style="--tx: {projectLinks[hoveredProject].photoSize[0] + (Math.random() * 20 - 10)}%; --ty: {(ui.isMobile ? 10 : (projectLinks[hoveredProject].photoSize[1] + (Math.random() * 20 - 10)))}%; --rot: {Math.random() * 30 - 15}deg; width: {projectLinks[hoveredProject].photoSize[2]}%; height: {projectLinks[hoveredProject].photoSize[2]}%"
-                        />
-                    {/key}
-                {/if}
+                {#key hoveredProject}
+                    <img 
+                        class="dropShadow help"
+                        id="projectToken"
+                        src={projectLinks[hoveredProject].photo} 
+                        alt={projectLinks[hoveredProject].name + " Photo"} 
+                        style="--tx: {projectLinks[hoveredProject].photoSize[0] + (Math.random() * 20 - 10)}%; --ty: {(ui.isMobile ? 10 : (projectLinks[hoveredProject].photoSize[1] + (Math.random() * 20 - 10)))}%; --rot: {Math.random() * 30 - 15}deg; width: {projectLinks[hoveredProject].photoSize[2]}%; height: {projectLinks[hoveredProject].photoSize[2]}%"
+                    />
+                {/key}
             </div>
         </div>
     {/if}
@@ -478,22 +478,24 @@
                             flex-direction: row;
                             gap: 0.5rem;
                             align-items: center;
-                            transform: translateX(-2.65rem);
                             transition: all var(--quickTransition) ease-in-out;
-                            > .progressBar {
+                            transform: translateX(-1.3rem);
+
+                            img{
+                                transform: rotate(165deg);
                                 opacity: 0;
-                                transition: opacity var(--vQuickTransition) ease-in-out;
+                                transition: all var(--quickTransition) ease-in-out;
                             }
                         }
-                        
                     }
                     > li.hovered {
                         > a {
                             color: var(--prBlack);
-                            transform: translateX(0);
-                            > .progressBar {
+                            transform: translateX(0rem);
+
+                            img{    
+                                transform: rotate(180deg);
                                 opacity: 1;
-                                transition: opacity var(--vQuickTransition) ease-in-out var(--vQuickTransition);
                             }
                         }
                     }
@@ -509,6 +511,18 @@
                 transform: translate(-50%, -50%);
                 text-align: center;
                 z-index: 10;
+
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 1.25rem;
+
+                img {
+                    width: 2rem;
+                    height: 2rem;
+                    display: none;
+                    animation: pointHint 0.6s ease-in-out infinite alternate;
+                }
             }
 
             #projectToken {
@@ -525,12 +539,20 @@
 
             #progressBar {
                 position: absolute;
-                bottom: calc(0px + var(--marM));
+                bottom: calc(0px + var(--marS));
                 top: auto;
                 left: 50%;
                 transform: translate(-50%, 0);
                 text-align: center;
                 z-index: 11;
+                display: inline-flex;
+                gap: 0.5rem;
+                transition: all var(--vQuickTransition) ease-in-out;
+            }
+
+            #progressBar.hidden{
+                opacity: 0;
+                transform: translate(-50%, 0.25rem);
             }
             
         }
@@ -542,7 +564,7 @@
                 #projects{
                     #projectPhrase {
                         position: absolute;
-                        bottom: calc(0px + var(--marM));
+                        bottom: calc(var(--marM) + var(--marS));
                         top: auto;
                         left: 50%;
                         transform: translate(-50%, 0);
@@ -557,7 +579,7 @@
     @media (max-width: 62rem) {
         #intro {
             flex-direction: column;
-            gap: var(--marS);
+            gap: var(--marXS);
             .introText {
                 text-align: center;
                 font-size: var(--tSize2);
@@ -573,6 +595,18 @@
         #phrase { p {
             font-size: var(--tSize2);
         }}
+
+        #projects {
+            h1 {
+                margin-bottom: 0.5rem !important; 
+            }
+        }
+
+        #projectPhrase {
+            img {
+                display: block !important;
+            }
+        }
     }
 
     @keyframes slideIn {
@@ -594,6 +628,16 @@
         to {
             transform: translateY(0);
             opacity: 1;
+        }
+    }
+
+
+    @keyframes pointHint {
+        from {
+            transform: translateY(1rem);
+        }
+        to {
+            transform: translateY(0rem);
         }
     }
 </style>
