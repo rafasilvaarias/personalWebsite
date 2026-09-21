@@ -8,6 +8,11 @@
   src: url('/fonts/HedvigLettersSerif_14pt-Regular.ttf') format('truetype');
 }
 
+@font-face {
+    font-family: 'Arial';
+    src: url('/fonts/ARIAL.ttf') format('truetype');
+}
+
 :root {
     --prBlack: #231F20;
     --prBlack2: #626366;
@@ -73,7 +78,7 @@
 
 html,
 body {
-  font-family: 'prSans', sans-serif;
+  font-family: 'prSans', 'Arial', sans-serif;
   background-color: var(--prWhite);
   color: var(--prBlack);
   font-size: 1em;

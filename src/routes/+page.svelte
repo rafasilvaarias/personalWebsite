@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { disableScrollHandling } from '$app/navigation';
     import { ui } from '$lib/state.svelte.js';
     import {progressChar, getProgressChar} from '$lib/utils';
     import { onMount} from 'svelte';
