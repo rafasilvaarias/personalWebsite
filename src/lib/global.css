@@ -10,7 +10,7 @@
 
 @font-face {
     font-family: 'Arial';
-    src: url('/fonts/ARIAL.ttf') format('truetype');
+    src: url('/fonts/ARIAL.TTF') format('truetype');
 }
 
 :root {
