@@ -1,6 +1,9 @@
 <script lang="ts">
-	//import favicon from '$lib/assets/icon.ico';
 
+	import BoxButton from '$lib/components/boxButton.svelte';
+	import LinkRow from '$lib/components/linkRow.svelte';
+	
+	//favicon
 	import icon0 from '$lib/assets/icon0.ico';
 	import icon1 from '$lib/assets/icon1.ico';
 	import icon2 from '$lib/assets/icon2.ico';
@@ -13,19 +16,62 @@
 
 	import '$lib/global.css';
 
+	//ui variables
 	import { onMount } from 'svelte';
 	import { ui } from '$lib/state.svelte.js';
 
 	onMount(() => {
-		const mq = window.matchMedia('(max-width: 55rem)');
-		ui.isMobile = mq.matches;
-		mq.addEventListener('change', (e) => ui.isMobile = e.matches);
-
 		const id = setInterval(() => {
-			if (iconIndex == 4) iconIndex = 0;
-			else iconIndex += 1;
+			iconIndex = (iconIndex + 1) % icons.length;
 		}, 416);
+
+		return () => clearInterval(id);
 	});
+
+	//go to top button
+
+	let launching = $state(false);
+
+	function goTop(): void {
+		if (launching) return;
+
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+		return;
+		}
+
+		launching = true;
+	}
+
+	function onAnimationEnd(e: AnimationEvent): void {
+		if (!e.animationName.endsWith('chargeUp')) return;
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+		launching = false;
+	}
+
+	//footerBlur
+
+	let footerEl: HTMLElement | undefined = $state();
+	let contentH = $state(0);
+	let winH = $state(0);
+	let progress = $state(0);
+	let eased = $derived(progress ** 3); // ease-in cubic
+
+	const MAX_BLUR = 15;
+	const START_INSET = 0.5;
+
+	let blur = $derived(eased * MAX_BLUR);
+	let inset = $derived((1 - eased) * START_INSET);
+
+	function updateBlur(): void {
+		if (!footerEl) return;
+		const rect = footerEl.getBoundingClientRect();
+		const covered = window.innerHeight - rect.top;
+		progress = Math.min(1, Math.max(0, covered / rect.height));
+	}
+
+	// sticky offset: pin the *bottom* of the content to the bottom of the viewport
+	let stickyTop = $derived(Math.min(0, winH - contentH));
 
 	let { children } = $props();
 </script>
@@ -35,191 +81,166 @@
 	<link rel="icon" href={iconRef} />
 </svelte:head>
 
-{@render children()}
+<svelte:window bind:innerHeight={winH} onscroll={updateBlur} onresize={updateBlur} />
 
-{#if ui.introComplete}
-
-<hr/> 
-<footer>
-	<div id="backToTop" class="black">
-		<button onclick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-			<img src="/icons/blueArrowTop.svg" alt="arrow pointing up" />
-			<p class="textCenter">back to top</p>
-		</button>
+<div class="wrap">
+	<div
+		class="content"
+		bind:clientHeight={contentH}
+		style:top="{stickyTop}px"
+		style:filter="blur({blur}px)"
+	>
+		{@render children()}
 	</div>
-	<div id="linkList">
+
+	<footer
+		bind:this={footerEl}
+		style:margin-inline="calc(var(--marB) + {inset}rem)"
+	>
 		<nav>
-			<ul>
-				<li><a id="homeLink" href="/"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>Home</a></li>
-				<li><a href="/#projects"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>Projects (Selected)</a></li>
-				<li><a href="/project/mastersDissertation" class="indented"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>Master's Dissertation</a></li>
-				<li><a href="/project/shiftAPPens" class="indented"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>Shift APPens</a></li>
-				<li><a href="/project/rese" class="indented"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>RESE</a></li>
-				<li><a href="/project/festaDasLatas" class="indented"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>Festa das Latas</a></li>
-				<li><a href="/about"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>About</a></li>
-			</ul>
+			{#if ui.isDesktop}
+				<div>
+					<button
+						id="goTop"
+						class:launching
+						onclick={goTop}
+						onanimationend={onAnimationEnd}
+						aria-label="go to top of the page"
+						>
+						<img alt="handUp" class="iconSize3" src="/icons/handUp.svg" />
+					</button>
+					<BoxButton text={"Home"} link={"/"}  />
+				</div>
+				<div>	
+					<h3 class="tSize1">Projects</h3>
+					<BoxButton text={"Master's Dissertation"} link={"/project/mastersDissertation"} />
+					<BoxButton text={"Shift APPens"} link={"/project/shiftAPPens"} />
+					<BoxButton text={"RESE"} link={"/project/rese"}  />
+					<BoxButton text={"Festa das Latas"} link={"/project/festaDasLatas"} />
+				</div>
+				<div>
+					<BoxButton text={"About"} link={"/about"}  />
+				</div>
+			{:else}
+				<button
+					id="goTop"
+					class:launching
+					class="mbXS"
+					onclick={goTop}
+					onanimationend={onAnimationEnd}
+					aria-label="go to top of the page"
+					>
+					<img alt="handUp" class="iconSize3" src="/icons/handUp.svg" />
+				</button>
+				<LinkRow text={"Home"} link={"/"}/>
+				<LinkRow text={"Master's Dissertation"} link={"/project/mastersDissertation"}/>
+				<LinkRow text={"Shift APPens"} link={"/project/shiftAPPens"}/>
+				<LinkRow text={"RESE"} link={"/project/rese"}/>
+				<LinkRow text={"Festa das Latas"} link={"/project/festaDasLatas"}/>
+				<LinkRow text={"About"} link={"/about"}/>
+			{/if}
 		</nav>
-		<ul id="externalLinks">
-			<li><a id="CVLink" href="/CV.pdf" target="_blank" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>CV</a></li>
-			<li><a href="mailto:arias.rafael@outlook.pt" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>Email</a></li>
-			<li><a href="https://www.linkedin.com/in/rafasilvaarias/" target="_blank" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>LinkedIn</a></li>
-			<li><a href="https://github.com/rafasilvaarias" target="_blank" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>GitHub</a></li>
-			<li><a href="https://www.instagram.com/rafasilvaarias/" target="_blank" class="resize"><img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>Instagram</a></li>
-		</ul>
-	</div>
-</footer>
-
-{/if}
-
+		<div id="links">
+			{#if ui.isDesktop}
+				<div>
+					<BoxButton text={"Email"} link={"mailto:arias.rafael@outlook.pt"}  resize />
+				</div>
+				<div>	
+					<h3 class="tSize1">Social</h3>
+					<BoxButton text={"LinkedIn"} link={"https://www.linkedin.com/in/rafasilvaarias/"}  resize />
+					<BoxButton text={"Instagram"} link={"https://www.instagram.com/rafasilvaarias/"}  resize />
+					<BoxButton text={"Github"} link={"https://github.com/rafasilvaarias"}  resize />
+				</div>
+				<div>
+					<BoxButton text={"CV"} link={"/CV.pdf"}  resize />
+				</div>
+			{:else}
+				<a class="tSize1 underline resize" href="mailto:arias.rafael@outlook.pt">Email</a>
+				<a class="tSize1 underline resize" href="https://www.linkedin.com/in/rafasilvaarias/">LinkedIn</a>
+				<a class="tSize1 underline resize" href="https://www.instagram.com/rafasilvaarias/">Instagram</a>
+				<a class="tSize1 underline resize" href="https://github.com/rafasilvaarias">Github</a>
+				<a class="tSize1 underline resize" href="/CV.pdf">CV</a>
+			{/if}
+		</div>
+	</footer>
+</div>
 
 <style>
-	footer {
-		margin: 0;
-        width: 100%;
-        min-height: 100svh;
-		background: radial-gradient(ellipse 100svw 100svh at bottom, var(--prYellow) 0%, transparent 100%);
-		padding: var(--marS);
+	#goTop:hover {
+		animation: wiggle 0.3s linear infinite;
+	}
 
-		display:flex;
+  /* must come after :hover and be at least as specific */
+	#goTop.launching,
+	#goTop.launching:hover {
+		animation: chargeUp 0.6s cubic-bezier(0.23, 1, 0.320, 1) forwards;
+	}
+
+	@keyframes chargeUp {
+		0%   { transform: translateY(0); }
+		22%   { transform: translateY(-3px); }
+		88%  { transform: translateY(12px) rotate(5deg); }   /* slowly crouch down */
+		100% { transform: translateY(-6px) rotate(0); }   /* spring up a bit past the start */
+	}
+
+	nav, #links{
+		display: flex;
+		flex-direction: row;
 		justify-content: space-between;
-		flex-direction: column;
-
-		> #backToTop {
+		width: 100%;
+		align-items: center;
+		div{
 			display: flex;
-			flex-direction: row;
-			align-items: center;
-			gap: 0.5rem;
 			justify-content: center;
-			margin-bottom: var(--marM);
-
-			> button {
-				display: flex;
-				flex-direction: row;
-				align-items: center;
-				gap: 0.5rem;
-				transform: translateX(-0.65rem);
-				transition: all var(--quickTransition) ease-in-out;
-
-				> img {
-					opacity: 0;
-					transform: rotate(15deg);
-					transition: all var(--quickTransition) ease-in-out;
-				}
-			}
-
-			> button:hover {
-				transform: translateX(0);
-				> img {
-					opacity: 1;
-					transform: rotate(0deg);
-				}
-			}
-		}
-			
-
-		> #linkList {
-			display: flex;
-			flex-direction: row;
-			gap: var(--marS);
-			align-items: flex-end;
-			height: 100%;
-
-			ul{
-				display: flex;
-				flex-direction: column;
-				
-
-				> li {
-					height: 1.85rem;
-
-					
-
-					a{
-						display: flex;
-						flex-direction: row;
-						align-items: center;
-						gap: 0.5rem;
-						transform: translateX(-1.25rem);
-						transition: all var(--quickTransition) ease-in-out;
-						
-						img{
-							opacity: 0;
-							transform: rotate(165deg);
-							transition: all var(--quickTransition) ease-in-out;
-						}
-					}
-
-					a:hover{
-						transform: translateX(0rem);
-						img{
-							opacity: 1;
-							transform: rotate(180deg);
-						}
-					}
-
-					.indented {
-						margin-left: 1.25rem;
-					}
-
-					#homeLink { img{
-							transform: rotate(15deg);
-					}}
-
-					#homeLink:hover { img{
-							transform: rotate(0deg);
-					}}
-				}
-
-			}
-
-			#externalLinks { 
-				li{ 
-					a{ 
-						img{
-							transform: rotate(150deg);
-						}
-					}
-
-					#CVLink { 
-						img{
-							transform: rotate(-75deg);
-						}
-					}
-				}
-			}
-
-			#externalLinks { 
-				li{ 
-					a:hover{ 
-						img{
-							transform: rotate(135deg);
-						}
-					}
-
-					#CVLink:hover{ 
-						img{
-							transform: rotate(-90deg);
-						}
-					}
-				}
-			}
-
-			> nav, > ul {
-				width: var(--gridSize);
-			}
+			align-items: center;
+			gap: var(--marXS);
 		}
 	}
 
-	@media (max-width: 55rem) {
-		footer {
-			> #linkList {
-				gap: var(--marS);
-				flex-direction: column;
-				justify-content: end;
-				> nav, > ul {
-					width: 100%;
-				}
-			}
+	.wrap {
+		position: relative;
+		display: flow-root;
+	}
+
+	.content {
+		position: sticky;
+		z-index: 0;
+		will-change: filter;
+	}
+
+	footer{
+		position: relative;
+		z-index: 1;
+		background: var(--prWhite);
+		height: calc(100svh - (2* var(--marB)));
+		max-height: 29rem;
+
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		margin: var(--marB);
+		padding: var(--marXS);
+		border: 1.5px solid var(--prBlack);
+	}
+
+	@media (max-width: 68rem) {
+		footer{
+			height: fit-content;
+			max-height: none;
+			gap: var(--marM);
+		}
+
+		nav, #links{
+			flex-direction: column;
+			justify-content:center;
+		}
+
+		nav{
+			align-items:center;
+		}
+
+		#links{
+			align-items:start;
 		}
 	}
 </style>

@@ -1,4 +1,4 @@
-#header RESE; 2024/2025
+#info PROJECT, RESE; ROLE, Solo Web Designer/Developer; YEAR, 2025;  
 
 #phrase One middle man was doing the work of thirty people. I designed and developed a web platform to fix it.
 
@@ -79,18 +79,15 @@ The identity had one goal: look proudly online-only. People kept assuming RESE w
 
 I built the identity alone at first. [Bruno Carril](https://www.instagram.com/_opiaet/) and Matilde Couto later entirely rebuilt its Instagram presence. The first three images below show the old version; the last three show the new one.
 
-#endDiv
-#gallery ![reseOldPost1.jpg; 1]; ![reseOldPost2.jpg; 1]; ![reseOldPost3.jpg; 1]
-#gallery ![reseNewPost1.jpg; 1]; ![reseNewPost2.jpg; 1]; ![reseNewPost3.jpg; 1]
+#stiffGallery ![reseOldPost1.jpg; 1]; ![reseOldPost2.jpg; 1]; ![reseOldPost3.jpg; 1]
+#stiffGallery ![reseNewPost1.jpg; 1]; ![reseNewPost2.jpg; 1]; ![reseNewPost3.jpg; 1]
 
-#startDiv
 
 Below are more pieces I've designed for [RESE](https://radiorese.pt/) over the years. My presence in [RESE](https://radiorese.pt/) has taken up a large share of my time as a designer, so there's a lot to show.
 #endDiv 
-#gallery +[reseFest.mp4; 1]; ![reseFestR.jpg; 2]
+#gallery +[reseFest.mp4; 1]; +[reseCeramimcs.mp4; 2]
 
-#startDiv 
-+[reseCeramimcs.mp4]
+#gallery ![reseFestR.jpg; 2]
 #endDiv 
 +[reseVideoEntrada.mp4]
 #startDiv

@@ -1,4 +1,4 @@
-#header Shift APPens; 2025/2026
+#info PROJECT, Shift APPens; ROLE, Lead Designer, Developer; YEAR, 2025;  
 
 #phrase Pixelization, ASCII, and computer vision inspired us. So I built a web tool that transforms images and video with these algorithms. That tool became the visual identity.
 

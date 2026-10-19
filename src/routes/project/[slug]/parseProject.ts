@@ -1,14 +1,10 @@
-
-export interface TocItem {
-  id: string;
-  name: string;
-}
-
 export interface ParsedProject {
   html: string;
-  tableOfContents: TocItem[];
-  readingTimeMinutes: number;
-  header: string[];
+}
+
+interface TocItem {
+  id: string;
+  name: string;
 }
 
 const WORDS_PER_MINUTE = 200;
@@ -37,11 +33,51 @@ function renderMedia(marker: string, inner: string): string {
     : media;
 }
 
+// Renders the #info line and appends READ TIME as the last item.
+function renderInfo(raw: string, readingTimeMinutes: number): string {
+  const entries = raw
+    .split(';')
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  entries.push(`READ, ${readingTimeMinutes}min`);
+
+  const items = entries.map(entry => {
+    const comma = entry.indexOf(',');
+
+    if (comma === -1) {
+      return `<div class="infoItem"><p class="value">${inline(entry)}</p></div>`;
+    }
+
+    const label = entry.slice(0, comma).trim();
+    const value = entry.slice(comma + 1).trim();
+
+    return `<div class="infoItem">` +
+      `<span class="label">${label}</span>` +
+      `<p class="value">${inline(value)}</p>` +
+      `</div>`;
+  });
+
+  return `<div class="info">${items.join('\n')}</div>\n`;
+}
+
+function renderToc(items: TocItem[]): string {
+  if (!items.length) return '';
+
+  const links = items
+    .map(item => `<a href="#${item.id}" class="internal">${item.name}</a>`)
+    .join('\n');
+
+  return `<div id="tableOfContents">\n${links}\n</div>\n`;
+}
+
 export function parseProjectMd(md: string, _slug: string): ParsedProject {
   const lines: string[] = md
     .split('\n')
     .map(l => l.trim())
     .filter(Boolean);
+
+  const readingTimeMinutes = estimateReadingTime(md);
 
   let html = '';
   let listBuffer: string[] = [];
@@ -49,21 +85,25 @@ export function parseProjectMd(md: string, _slug: string): ParsedProject {
   let fauxDivOpen = false;
   let contextAssigned = false;
 
-  const header: string[] = [];
+  // The TOC is inserted immediately before the first section.
+  // Its placeholder is replaced after all headings have been collected.
+  const tocPlaceholder = '<!--TOC_PLACEHOLDER-->';
+  let tocInserted = false;
+
   const tableOfContents: TocItem[] = [];
 
-  // Tags the first opening element in the doc (before any heading) as the
-  // "Context" entry, whatever type that element happens to be.
   const withContext = (fragment: string): string => {
     if (contextAssigned || divOpen) return fragment;
 
     contextAssigned = true;
-    tableOfContents.unshift({
-      id: 'context',
-      name: 'Context'
-    });
+    tableOfContents.unshift({ id: 'context', name: 'Context' });
 
-    return fragment.replace(/^<(\w+)/, `<$1 id="context"`);
+    const tagged = fragment.replace(/^<(\w+)/, `<$1 id="context"`);
+
+    return tagged.replace(
+      /^<p\b[\s\S]*?<\/p>/,
+      match => `<!--reveal-start-->${match}<!--reveal-end-->`
+    );
   };
 
   const flushList = (): void => {
@@ -105,10 +145,7 @@ export function parseProjectMd(md: string, _slug: string): ParsedProject {
       continue;
     }
 
-    // #startDiv opens a standalone "fauxContent" div, used to resume
-    // text flow after a #gallery/media break without re-opening a full
-    // heading section. It closes the same way a section does: on the
-    // next heading, or explicitly via #endDiv.
+    // Opens a standalone fauxContent div.
     if (/^#startDiv\b/.test(line)) {
       html += '<div class="fauxContent">\n';
       fauxDivOpen = true;
@@ -116,22 +153,12 @@ export function parseProjectMd(md: string, _slug: string): ParsedProject {
     }
 
     // #gallery, #flexGallery and #stiffGallery
-    //
-    // Example:
-    // #gallery ![a.jpg; 1] +[b.mp4; 1; https://...]
-    // #flexGallery ![a.jpg; 1] +[b.mp4; 1; https://...]
-    // #stiffGallery ![a.jpg; 1] +[b.mp4; 1; https://...]
-    //
-    // Multiple image/video tokens are rendered side by side inside
-    // a single wrapping div. The CSS class matches the tag name.
     const galleryMatch = line.match(
       /^#(gallery|flexGallery|stiffGallery)\s+(.+)/
     );
 
     if (galleryMatch) {
-      const [, galleryClass, content] = galleryMatch[0].match(
-        /^#(gallery|flexGallery|stiffGallery)\s+(.+)/
-      )!;
+      const [, galleryClass, content] = galleryMatch;
 
       const tokenRegex = /([!+])\[([^\]]+)\]/g;
       const items: string[] = [];
@@ -150,30 +177,26 @@ export function parseProjectMd(md: string, _slug: string): ParsedProject {
       continue;
     }
 
-    // ![path; sizeValue; url]  (image)
-    // +[path; sizeValue; url]  (video)
+    // ![path; sizeValue; url] (image)
+    // +[path; sizeValue; url] (video)
     const media = line.match(/^([!+])\[(.+?)\]$/);
 
     if (media) {
       const [, marker, inner] = media;
 
-      html += withContext(
-        renderMedia(marker, inner) + '\n'
-      );
-
+      html += withContext(renderMedia(marker, inner) + '\n');
       continue;
     }
 
-    const headerMatch = line.match(/^#header\s+(.+)/);
+    // #header is swallowed and not rendered.
+    if (/^#header\b/.test(line)) {
+      continue;
+    }
 
-    if (headerMatch) {
-      header.push(
-        ...headerMatch[1]
-          .split(';')
-          .map(s => s.trim())
-          .filter(Boolean)
-      );
+    const infoMatch = line.match(/^#info\s+(.+)/);
 
+    if (infoMatch) {
+      html += renderInfo(infoMatch[1], readingTimeMinutes);
       continue;
     }
 
@@ -197,7 +220,6 @@ export function parseProjectMd(md: string, _slug: string): ParsedProject {
         `<blockquote class="instagram-media" data-instgrm-permalink="${permalink}" data-instgrm-version="14" style="width:100%; max-width:100%; min-width:auto; margin:0;">` +
         `<div style="padding:16px;"></div>` +
         `</blockquote>\n`
-        /*+ `<script async src="//www.instagram.com/embed.js"></script>\n`*/
       );
 
       continue;
@@ -212,6 +234,13 @@ export function parseProjectMd(md: string, _slug: string): ParsedProject {
       }
 
       closeDiv();
+
+      // Place a placeholder before the first section.
+      // The complete TOC is generated after parsing all headings.
+      if (!tocInserted) {
+        html += tocPlaceholder + '\n';
+        tocInserted = true;
+      }
 
       const title = heading[1];
       const id = sanitize(title);
@@ -242,7 +271,7 @@ export function parseProjectMd(md: string, _slug: string): ParsedProject {
       );
 
       const joiner = id === 'logicChain'
-        ? '<p class="arrows">-> </p>'
+        ? '<p class="arrows"><img class=" iconSize1" src="/icons/arrowRight.svg" alt="" /></p>'
         : '';
 
       html += withContext(
@@ -252,9 +281,7 @@ export function parseProjectMd(md: string, _slug: string): ParsedProject {
       continue;
     }
 
-    html += withContext(
-      `<p>${inline(line)}</p>\n`
-    );
+    html += withContext(`<p>${inline(line)}</p>\n`);
   }
 
   flushList();
@@ -266,14 +293,17 @@ export function parseProjectMd(md: string, _slug: string): ParsedProject {
 
   closeDiv();
 
-  const readingTimeMinutes = estimateReadingTime(md);
+  // Generate the complete TOC after every heading has been collected.
+  const tocHtml = renderToc(tableOfContents);
 
-  return {
-    html,
-    tableOfContents,
-    readingTimeMinutes,
-    header
-  };
+  if (tocInserted) {
+    html = html.replace(tocPlaceholder, tocHtml);
+  } else {
+    // If there are no sections, place the TOC at the top.
+    html = tocHtml + html;
+  }
+
+  return { html };
 }
 
 function estimateReadingTime(md: string): number {

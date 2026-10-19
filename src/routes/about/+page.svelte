@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Header from '$lib/header.svelte';
+    import Header from '$lib/components/header.svelte';
 
     const timeline = [
         { photo: "baby.gif", time: "Rafa Silva Arias" },
@@ -31,7 +31,7 @@
     
 </script>
 
-<Header header={["About"]} />
+<Header/>
 
 <div id="aboutWrapper">
     <div id="about">
@@ -41,7 +41,7 @@
                 {#if happening.message}
                     <p class="message">{@html happening.message}</p>
                 {:else if happening.photo}
-                    <img class="dropShadow help" src={"/photos/about/" + happening.photo} alt="" />
+                    <img class="help" src={"/photos/about/" + happening.photo} alt="" />
                 {/if}
             </div>
         {/each}
@@ -65,12 +65,14 @@
             gap: 0.6rem;
 
             .time{
-                font-size: 0.8rem;
+                font-size: 0.62rem;
             }
         }
 
         :global(a) {
-            color: var(--prBlue);
+            text-decoration: underline dotted;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 15%;
         }
     }
 

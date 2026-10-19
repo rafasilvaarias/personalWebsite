@@ -1,5 +1,4 @@
-#header Festa das Latas; 2024
-
+#info PROJECT, Festa das Latas; ROLE, Lead Designer; YEAR, 2024;  
 
 #phrase Zero supervision, total creative freedom, and 30€. We used all to design a festival identity out of destruction.
 

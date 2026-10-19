@@ -1,81 +1,40 @@
+<script module lang="ts">
+    let introPlayed = false;
+</script>
+
 <script lang="ts">
     import { ui } from '$lib/state.svelte.js';
-    import {progressChar, getProgressChar} from '$lib/utils';
-    import { onMount} from 'svelte';
-  
+    import { onMount } from 'svelte';
+    import FishAnimation from '$lib/components/fishAnimation.svelte';
+    import LinkRow from '$lib/components/linkRow.svelte';
+    import RevealText from '$lib/components/revealText.svelte';
 
     // #region Projects
-
-    let projectsRef = $state<HTMLElement>();
-    let projectsTop = $state(0);
-    let projectsHeight = $state(0);
-    let projectsBottom = $state(0);
-
-    $effect(() => {
-        if (projectsRef) projectsTop = projectsRef.offsetTop;
-    });
-    $effect(() => {
-        if (projectsRef) projectsHeight = projectsRef.offsetHeight * (2 / 3);
-    });
-    $effect(() => {
-        projectsBottom = projectsHeight + projectsTop;
-    });
-
-    let hoveredProject = $state(0);
-    let progressBar = $state(0);
-    let inProjectsSection = $state(false);
-
-    $effect(() => {
-        inProjectsSection = scrollY >= projectsTop && scrollY <= projectsBottom;
-    });
-
-    $effect(() => {
-        hoveredProject = 
-        scrollY < projectsTop || projectsHeight <= 0 ?
-        0 :
-        Math.max(0, Math.min(Math.floor(
-            (scrollY - projectsTop)
-            / (projectsHeight / 4)
-        ), projectLinks.length - 1));
-    });
-
-    $effect(() => {
-        progressBar = 
-        scrollY < projectsTop ?
-        0 :
-        scrollY > projectsBottom ?
-        1 :
-        ((scrollY - projectsTop)
-        % (projectsHeight / progressChar.length)
-        / (projectsHeight / progressChar.length));
-    });
-
-    const projectLinks = [
+    const projects = [
         {
             name: "Master's Dissertation",
             link: '/project/mastersDissertation',
             characteristics: ['Web Development', 'Music Artwork'],
             year: "2026",
             phrase: "Making generative music run and distribute on the web",
-            photo: '/photos/homepageTokens/mastersDissertationToken.jpg',
-            photoSize: [20, 10, 55]
+            photo: '/projects/content/mdBanner.jpg',
         },
         {
             name: 'Shift APPens',
             link: '/project/shiftAPPens',
             characteristics: ['Visual Identity', 'Web Development', 'Design Tool Development'],
             year: "2025/2026",
-            phrase: "How <span class='serif'>coding a design tool </span>defined a visual identity",
-            photo: '/photos/homepageTokens/shiftAPPensToken.png',
+            phrase: "How coding a design tool defined a visual identity",
+            photo: '/projects/content/saBanner.jpg',
             photoSize: [-40, -30, 60]
         },
         {
             name: "RESE",
             link: '/project/rese',
-            characteristics: ['Service Design','Web Development', 'Visual Identity'],
+            characteristics: ['Service Design', 'Web Development', 'Visual Identity'],
             year: "2024/2025",
-            phrase: "<span class='serif'>Solving the workflow</span> of a ~60 people online radio station",
-            photo: '/photos/homepageTokens/reseToken.png',
+            phrase: "Solving the workflow of a ~60 people online radio station",
+            photo: '/projects/content/reseFestR.jpg',
             photoSize: [-170, -10, 35]
         },
         {
@@ -83,529 +42,456 @@
             link: '/project/festaDasLatas',
             characteristics: ['Visual Identity'],
             year: "2024",
-            phrase: "A <span class='serif'>30€ budget visual identity </span> for a 25000 people festival",
-            photo: '/photos/homepageTokens/festaDasLatasToken.png',
+            phrase: "A 30€ budget visual identity for a 25000 people festival",
+            photo: '/projects/content/flBanner.jpg',
             photoSize: [-90, 10, 60]
-
         },
-        
     ];
-    onMount(() => {
-        projectLinks.forEach(project => {
-            const img = new Image();
-            img.src = project.photo;
-        });
-    });  
 
-    // #endregion
+    // Stable arrays, so RevealText doesn't see a new `texts` on every render
+    const projectNames = projects.map((p) => p.name);
+    const projectPhrases = projects.map((p) => p.phrase);
 
-    // #region percentual scroll
-        let scrollY = $state(0);
-        let innerHeight = $state(0);
-        let scrollHeight = $state(1); // avoid divide-by-zero on first render
-
-        $effect(() => {
-        scrollHeight = document.documentElement.scrollHeight;
-        });
-
-        let scrollPercent = $derived(
-        scrollHeight > innerHeight ? scrollY / (scrollHeight - innerHeight) : 0
-        );
-    // #endregion
-
-    // #region intro
-    const introPhrases = [
-        ["Hi! I'm <span class='serif'>Rafa <br> Silva Arias</span>", "and I'm <br> culturally aware"],
-        ["I made <br> this token", "to prove <br> <span class='serif'> I'm tapped in </span>"],
-        ["It's this <br> <span class='serif'>neat object</span>", "creating me <br> into <span class='serif'>reality </span>"],
-        ["It represents <br> me as a", "Designer <br> Programmer <br> Human"],
-        ["<span class='serif'> Rafa <br> Silva <br> Arias </span>", "Designer <br> Programmer <br> Human"]
+    const extras = [
+        {
+            name: "Essay colla voce: Where Afro-Surrealism Meets Music",
+            link: "https://stylorevistaea.wordpress.com/rafa-arias/"
+        },
+        {
+            name: "Podcast Como Calha [PT]",
+            link: "https://www.youtube.com/@ComoCalha"
+        }
     ]
 
-    const SEEN_INTRO_KEY = 'seenIntro';
-    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    let scrollY = $state(0);
+    let innerHeight = $state(0);
 
-    function getSeenIntro(): boolean {
-        if (typeof localStorage === 'undefined') return false;
-        const raw = localStorage.getItem(SEEN_INTRO_KEY);
-        if (!raw) return false;
+    let sectionEl = $state<HTMLElement>();
+    let sectionTop = $state(0);
+    let scrollLength = $state(0);
 
-        try {
-            const { value, expiresAt } = JSON.parse(raw);
-            if (Date.now() > expiresAt) {
-                localStorage.removeItem(SEEN_INTRO_KEY);
-                return false;
-            }
-            return value === true;
-        } catch {
-            localStorage.removeItem(SEEN_INTRO_KEY);
-            return false;
-        }
-    }
+    $effect(() => {
+        if (!sectionEl) return;
+        sectionTop = sectionEl.getBoundingClientRect().top + window.scrollY;
+        scrollLength = sectionEl.offsetHeight - innerHeight; // re-runs on resize
+    });
 
-    function setSeenIntro() {
-        if (typeof localStorage === 'undefined') return;
-        localStorage.setItem(
-            SEEN_INTRO_KEY,
-            JSON.stringify({ value: true, expiresAt: Date.now() + THIRTY_DAYS_MS })
+    let activeIndex = $derived(
+        scrollY < sectionTop || scrollLength <= 0
+            ? 0
+            : Math.min(
+                Math.floor((scrollY - sectionTop) / (scrollLength / projects.length)),
+                projects.length - 1
+            )
+    );
+    let projectProgress = $derived(
+        scrollY < sectionTop || scrollLength <= 0
+            ? 0
+            : Math.min(
+                (scrollY - sectionTop) / (scrollLength / projects.length),
+                projects.length
+            )
+    );
+    let slotProgress = $derived(Math.min(projectProgress - activeIndex, 1));
+
+    // The projects block pins to the top at scrollY === sectionTop, which is
+    // the moment the phrase is fully in view. Latches: never goes back to 0.
+    let phraseEl = $state<HTMLElement>();
+    let revealed = $state(false);
+
+    $effect(() => {
+        if (!phraseEl) return;
+        const io = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    revealed = true;
+                    io.disconnect(); // latches, only the first time
+                }
+            },
+            { threshold: 1 }
         );
-    }
+        io.observe(phraseEl);
+        return () => io.disconnect();
+    });
 
-    function upIntroIndex() {
-        introIndex = Math.max(introIndex - 1, 0);
-    }
+    let shouldScroll = $state(false);
 
-    function downIntroIndex() {
-        introIndex = Math.min(introIndex + 1, 4);
-        if (introIndex == 4) {
-            setTimeout(() => {
-                window.scrollTo({
-                    top: 64,
-                    behavior: 'smooth'
-                });
-            }, 500);
-        } 
-    }
-
-    let introIndex = $state(4);
-    let introKey = $state(4);
-    let seconds: number = $state(0);
-
-    let introInitialized = $state(false);
-    let hasMounted = false;
-
-    onMount(() => {
-        if (!getSeenIntro()) {
-            introIndex = 0;
-            introKey = 0;
+    $effect(() => {
+        if (stage === 8 && shouldScroll) {
+            ui.introComplete = true;
+            window.scrollTo({ top: 40, behavior: 'smooth' });
+            shouldScroll = false;
         }
-
-        ui.introComplete = introIndex === 4;
-
-        introInitialized = true;
-        hasMounted = true;
     });
 
-    $effect(() => {
-        ui.introComplete = introIndex === 4;
-    });
+    // 0 = hidden, otherwise 1-based project number
+    let projectSlot = $derived(revealed ? activeIndex + 1 : 0);
 
-    $effect(() => {
-        seconds = 0;
+    
+	// #region Intro
+	// 0 idle · 1 Hi! · 2 icon · 3 wiggle
+	// 4 name appears · 5 greeting exits · 6 collapse + token/role
+	// 7 done
 
-        if (introIndex === 4) {
-            if (!hasMounted) return;
+	// 0 idle · 1 Hi! · 2 icon · 3 wiggle · 4 name
+    // 5 greeting exits · 6 swap + width transition
+    // 7 reveal trail · 8 done
 
-            setSeenIntro();
+    let stage = $state(introPlayed ? 8 : 0);
 
+    const EXIT_MS = 300;
+    const COLLAPSE_MS = 250;
+
+    const timeline: [number, number][] = [
+        [100, 1],
+        [100, 2],
+        [200, 3],
+        [200, 4],
+        [700, 5],
+        [EXIT_MS, 6],
+        [COLLAPSE_MS, 7],
+        [300, 8],
+    ];
+
+    const hiActive = $derived(stage >= 5 ? 0 : stage >= 1 ? 1 : 0);
+    const iconActive = $derived(stage >= 5 ? 0 : stage >= 2 ? 1 : 0);
+    const imActive = $derived(stage >= 5 ? 0 : stage >= 4 ? 1 : 0);
+    const nameActive = $derived(stage >= 4 ? 1 : 0);
+    const trailActive = $derived(stage >= 7 ? 1 : 0);
+
+    let leadW = $state(0);
+    let trailW = $state(0);
+
+    const iconSize = $derived(
+        ui.isDesktop ? 'iconSize3'
+            : ui.isTablet ? 'iconSize2'
+            : 'iconSize15'
+    );
+
+    const leadWidth = $derived(
+        stage >= 6 ? '0px' : leadW ? `${leadW}px` : 'auto'
+    );
+
+    const trailWidth = $derived(
+        stage >= 8 ? 'auto' : stage >= 6 ? `${trailW}px` : '0px'
+    );
+
+	onMount(() => {
+
+        history.scrollRestoration = 'manual';
+
+        const resetScroll = () => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        };
+
+        resetScroll();
+        window.addEventListener('pageshow', resetScroll);
+
+        requestAnimationFrame(resetScroll);
+
+		if (stage === 8) {
+            ui.introComplete = true;
             return;
         }
 
-        introKey = introIndex;
+		if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			introPlayed = true;
+            stage = 8;
+            ui.introComplete = true;
+            return;
+		}
+        shouldScroll = true;
+		introPlayed = true;
+		let cancelled = false;
 
-        const id = setInterval(() => {
-            if (seconds >= 2) {
-                downIntroIndex();
-            } else {
-                seconds += 0.2;
-            }
-        }, 200);
+		// Prevent scrolling while the intro plays.
+		const block = (e: Event) => e.preventDefault();
 
-        return () => clearInterval(id);
-    });
+		window.addEventListener('wheel', block, { passive: false });
+		window.addEventListener('touchmove', block, { passive: false });
 
-    // #endregion
+		const unlock = () => {
+			window.removeEventListener('wheel', block);
+			window.removeEventListener('touchmove', block);
+		};
 
-    // #region intro wheel control
-    let wheelLocked = $state(false);
+		(async () => {
+			for (const [wait, next] of timeline) {
+				await new Promise((resolve) => setTimeout(resolve, wait));
 
-    function handleIntroWheel(e: WheelEvent) {
-        if (introIndex === 4 || wheelLocked) return;
+				if (cancelled) return;
 
-        wheelLocked = true;
-        setTimeout(() => (wheelLocked = false), 400); // debounce so one scroll tick = one step
+				stage = next;
+			}
 
-        if (e.deltaY > 0) {
-            downIntroIndex();
-        } else if (e.deltaY < 0) {
-            upIntroIndex();
-        }
-    }
-    // #endregion
+			unlock();
+			ui.introComplete = true;
+		})();
+
+		return () => {
+			cancelled = true;
+			unlock();
+			ui.introComplete = true;
+		};
+	});
+	// #endregion
 </script>
 
-<svelte:window bind:scrollY bind:innerHeight onwheel={handleIntroWheel}/>
+<svelte:window bind:scrollY bind:innerHeight />
 
 <main>
     <div id="intro">
-        {#if introInitialized}
-            {#key introIndex}
-                <p class="introText tSize3 textRight appear">{@html introPhrases[introIndex][0]}</p>
-            {/key}
-            <img id="token" src="/photos/token.webp" alt="gold token animation">
-            {#key introKey}
-                <p class="introText tSize3 textLeft appear">{@html introPhrases[introIndex][1]}</p>
-            {/key}
+        <p class="introLine {ui.isDesktop ? 'tSize3' : ui.isTablet ? 'tSize2' : 'tSize15'} serif textCenter">
+            <span class="collapse" style:width={leadWidth}>
+                <span class="collapseInner lead" bind:clientWidth={leadW}>
+                    <RevealText tag="span" duration={600} active={hiActive}>Hi!</RevealText>
+                    <RevealText tag="span" duration={600} active={iconActive}>
+                        <img
+                            class={iconSize}
+                            class:wiggle={stage >= 3 && stage < 5}
+                            src="/icons/handPalm.svg"
+                            alt=""
+                            aria-hidden="true"
+                        />
+                    </RevealText>
+                    <RevealText duration={600} tag="span" active={imActive}>I'm</RevealText>
+                </span>
+            </span>
 
-            {#if introIndex != 4}
-                <div id="introControls">
-                    <button aria-label="advance intro" onclick={upIntroIndex}></button>
-                    <button aria-label="retreat intro" onclick={downIntroIndex}></button>
-                </div>
-                <div aria-hidden="true" id="progressBarWrapper" class="appear">
-                    {#each Array(introPhrases.length - 1) as _, index}
-                        <p aria-hidden="true" class="blue">{introIndex > index ? "███" : introIndex == index ? getProgressChar(seconds/2) : "░░░"}</p>
-                    {/each}
-                </div>
-            {:else}
-                <button id="rewatchIntro" onclick={() => introIndex = 0}>
-                    <img src="/icons/blueCurveArrow.svg" alt="arrow pointing left" />
-			        <p class="textCenter">rewatch intro</p>
-                </button>
+            <RevealText duration={600} tag="span" active={nameActive} delay={100}>
+                Rafa Silva Arias
+            </RevealText>
+
+            {#if stage >= 6}
+                <span class="collapse" class:settled={stage >= 8} style:width={trailWidth}>
+                    <span class="collapseInner trail" bind:clientWidth={trailW}>
+                        <RevealText duration={600} tag="span" active={trailActive}>
+                            <img class={iconSize} id="token" src="/photos/token.webp" alt="gold token animation" />
+                        </RevealText>
+                        <RevealText duration={600} tag="span" class="sans" active={trailActive} delay={100}>
+                            {ui.isMobile ? '' : 'Web '}Designer/Developer
+                        </RevealText>
+                    </span>
+                </span>
             {/if}
-        {/if}
+        </p>
     </div>
-    {#if introInitialized && introIndex == 4}
-        <hr>
-        <div id="phrase">
-            <img
-                style="--tx: 63%; --ty: 80%; --rot: -3deg; --s: 35%; top: calc(50% + {scrollPercent * -15}%);"
-                src="/photos/homepagePhrase/fish.jpg" alt="Ocean Sunfish" class="dropShadow help" 
-            />
-            <img 
-                style="--tx: -150%; --ty: -110%; --rot: 5deg; --s: 40%; top: calc(50% + {scrollPercent * -15}%"
-                src="/photos/homepagePhrase/scuba.jpg" alt="Scuba Diver" class="dropShadow help" />
-            <p class="tSize3 textCenter">Creative work comes from <a href="https://en.wikipedia.org/wiki/Catching_the_Big_Fish" target="_blank" class="serif blue resize"> diving in one's pool of ideas</a>. My direction is an ever-expanding pool, with room to dive into any discipline. Like Brian Jones, <a href="/about" class="blue">I</a> was born to swim.</p>
+
+    <div id="slideIn">
+        <hr id="topLine"/>
+        <div id="phrase" class="mbS">
+            <RevealText>
+                <p class="{ui.isDesktop ? "tSize4" : "tSize3"} textLeft">
+                    Creative work comes from
+                    <img class="{ui.isDesktop ? "iconSize4" : "iconSize3"}" src="/icons/book.svg" alt="" aria-hidden="true" />
+                    <a href="https://en.wikipedia.org/wiki/Catching_the_Big_Fish" target="_blank" class="underline">diving</a> in one's pool of ideas.
+                    My desire is an ever-expanding pool, with room to dive into any discipline.
+                    Like Brian Jones, <a href="/about" class="underline">I</a>
+                    <img class="{ui.isDesktop ? "iconSize4" : "iconSize3"}" src="/icons/I.svg" alt="" aria-hidden="true" />
+                    was born to swim.
+                </p>
+            </RevealText>
+            <FishAnimation/>
         </div>
-        <hr>
-        <div id="projectsWrapper" bind:this={projectsRef}>
+
+        <div id="projectsWrapper" class="{ui.isMobile ? "mbM" : "mbL" }" bind:this={sectionEl}>
             <div id="projects">
-                <h1 class={ui.isMobile ? "tSize1 textCenter" : "tSize2 serif textCenter"}>Projects (Selected)</h1>
-                {#if hoveredProject !== null}
-                    <h2 class="tSize2 textCenter hideOnDesktop serif"><a href={projectLinks[hoveredProject].link}>{projectLinks[hoveredProject].name}</a></h2>
-                {/if}
-                <div id="projectsList" class="hideOnMobile">
-                    <ul>
-                        {#each projectLinks as project, index}
-                            <li class={hoveredProject === index ? 'hovered' : ''}>
-                                <a href={project.link} onmouseenter={() => scrollTo({ top: -1 + projectsTop + (projectsHeight * (index + 1) / 4)})} >
-                                    <img src="/icons/blueArrowLeft.svg" alt="arrow pointing left"/>
-                                    <h2>{project.name}</h2>
-                                </a>
-                            </li>
-                        {/each}
-                    </ul>
-                    <ul class="black3">
-                        {#each Array(hoveredProject) as _}
-                            <li></li>
-                        {/each}
-                        {#each projectLinks[hoveredProject].characteristics as characteristic}
-                            <li>{characteristic}</li>
-                        {/each}
-                    </ul>
-                    <ul class="black3">
-                        {#each Array(hoveredProject) as _}
-                            <li></li>
-                        {/each}
-                        <li>{projectLinks[hoveredProject].year}</li>
-                    </ul>
-                </div>
-
-                <div id="projectPhrase">
-                    <h3 class={ui.isMobile ? "tSize3" : "tSize4"}><a href={projectLinks[hoveredProject].link}>{@html projectLinks[hoveredProject].phrase}</a></h3>
-                    <img aria-hidden="true" alt="pointing hand" src="/icons/pointingHand.svg"/>
-                </div>
-
-                <div id="progressBar" class={inProjectsSection ? "" : "hidden"}>
-                    {#each projectLinks as project, index}
-                        <p class="blue">{index === hoveredProject ? getProgressChar(progressBar) : hoveredProject > index ? "███" : "░░░"}</p>
+                <div id="projectsL" class="{ui.isMobile ? "" : ui.isTablet ? "gridW g2" : "gridW g3"}">
+                    <div>
+                        <RevealText tag="h1" class="projectsHeading tSize1 {ui.isMobile ? "" : "mbXXS"}" delay={75} active={revealed ? 1 : 0}>Selected Projects</RevealText>
+                        <RevealText tag="h2" class="projectsName {ui.isMobile ? "mbXXS tSize15" : "mbXS tSize2"}" delay={150} texts={projectNames} active={projectSlot} />
+                    </div>
+                    {#each projects as project, i}
+                        <img  src={project.photo} alt="" aria-hidden="true" class:active={i === activeIndex}>
                     {/each}
                 </div>
-
-                {#key hoveredProject}
-                    <img 
-                        class="dropShadow help"
-                        id="projectToken"
-                        src={projectLinks[hoveredProject].photo} 
-                        alt={projectLinks[hoveredProject].name + " Photo"} 
-                        style="--tx: {projectLinks[hoveredProject].photoSize[0] + (Math.random() * 20 - 10)}%; --ty: {(ui.isMobile ? 10 : (projectLinks[hoveredProject].photoSize[1] + (Math.random() * 20 - 10)))}%; --rot: {Math.random() * 30 - 15}deg; width: {projectLinks[hoveredProject].photoSize[2]}%; height: {projectLinks[hoveredProject].photoSize[2]}%"
-                    />
-                {/key}
+                <div id="projectsR" class="{ui.isMobile ? "" : ui.isTablet ? "gridW g1" : "gridW g2"}">
+                    <div bind:this={phraseEl}>
+                        <RevealText class="{!ui.isDesktop ? "tSize2" : "tSize3"}" texts={projectPhrases} active={projectSlot} />
+                    </div>
+                    <LinkRow text="See Project" link={projects[activeIndex].link} width={ui.isMobile ? undefined : 1} progress={slotProgress} />
+                </div>
             </div>
         </div>
-    {/if}
+
+        <div id="extras" class="mbL">
+            <h1 class="{ui.isMobile ? "tSize2" : "tSize3"} mbXS hideOnDesktop">Extras</h1>
+            <hr />
+            <div>
+                <h1 class="tSize2 serif mtXXS hideOnMobile">Extras</h1>
+                <div id="extrasLinks">
+                    {#each extras as extra}
+                        <LinkRow text={extra.name} link={extra.link} width={ui.isDesktop ? 3 : ui.isTablet ? 2 : ui.isMobile ? undefined : undefined} resize={true} />
+                    {/each}
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
 <style>
     main {
         display: flex;
         flex-direction: column;
-        gap: 0rem;
     }
 
-    main > div, #projects {
-        margin: 0;
-        width: 100%;
-        height: 100svh;
-        padding: var(--marS);
+    .introLine img.wiggle {
+        animation: wiggle 600ms ease-out;
     }
+
+    .introLine {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        margin: 0;
+    }
+
+    .introLine :global(.reveal) {
+        flex: none;
+    }
+
+    /* the width animation that makes the name slide */
+    .collapse {
+        display: block;
+        flex: none;
+        min-width: 0;
+        overflow: hidden;
+        transition: width 300ms cubic-bezier(0.23, 1, 0.320, 1);
+    }
+
+    .collapse.settled {
+        transition: none;
+    }
+
+    .collapseInner {
+        display: flex;
+        align-items: center;
+        gap: 0.25em;
+        width: max-content;
+    }
+
+    .collapseInner.lead { padding-right: 0.25em; }
+    .collapseInner.trail { padding-left: 0.25em; }
 
     #intro {
+        position: sticky;   /* stays pinned while the slide-in covers it */
+        top: 0;
+        z-index: 0;
+        padding: var(--marB);
         background: radial-gradient(ellipse 100svw 100svh at top, var(--prYellow) 0%, transparent 100%);
         display: inline-flex;
-        gap: var(--marM);
+        gap: var(--marXS);
         flex-direction: row;
         justify-content: center;
         align-items: center;
+        height: 100svh;
 
-        > p{
-            width: 100%;
-            z-index: 3;
-        }
-
-        .appear {
-            animation: appear calc(var(--quickTransition)) ease-out;
-        }
-
-        #token{
-            width: 20rem;
-        }
-
-
-        #introControls{
-            position: absolute;
-            display: flex;
-            width: 100%;
-            height: 100svh;
-            z-index: 1;
-            button{
-                cursor:w-resize;
-                height: 100%;
-                width: 100%;
-            }
-        }
-
-        #progressBarWrapper{
-            position: absolute;
-            bottom: var(--marS);
-            display: flex;
-            width: 100%;
-            align-items: baseline;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        #rewatchIntro{
-            position: absolute;
-            bottom: var(--marS);
-            display: flex;
-            align-items: baseline;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all var(--quickTransition) ease-in-out;
-            transform: translateX(-1rem);
-
-            img{
-                opacity: 0;
-                transition: all var(--quickTransition) ease-in-out;
-                transform: rotate(30deg);
-            }
-        }
-
-        #rewatchIntro:hover{
-            transform: translateX(0);
-            img{ opacity: 1; transform: rotate(0deg);}
-            
-        }
-
-
-
+        > p { z-index: 3; }
     }
+
+    #slideIn {
+        filter: drop-shadow(0px -4px 4px rgba(0, 0, 0, 0.05)) drop-shadow(0px -12px 32px rgba(0, 0, 0, 0.05));
+        position: relative;
+        z-index: 1;
+        background-color: var(--prWhite);
+        padding: var(--marB);   /* the only padding now */
+
+        #topLine {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            height: 1px;
+            background-color: var(--prBlack3);
+        }
+
+
+
+        > div {
+            width: 100%;
+            padding: 0;
+        }
+    }
+
 
     #phrase {
         position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        p{
-            max-width: 58.43rem;
-        }
-
-        img {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            object-fit: cover;
-            z-index: 2;
-            pointer-events: none;
-            transform: translate(var(--tx), var(--ty)) rotate(var(--rot));
-            width: var(--s);
-            height: var(--s);
-            object-fit: contain;
-            animation: top var(--quickTransition) ease-in-out;
-        }
     }
 
     #projectsWrapper {
-        height: 300svh;
-        position: relative;
-        padding: 0;
+    height: 400svh;
+    position: relative;
+
         #projects {
             position: sticky;
             top: 0;
-            h1{
-                margin-bottom: var(--marS);
-            }
-            #projectsList {
-                display: flex;
-                flex-direction: row;
-                gap: var(--marS);
-                ul {
-                    display: flex;
-                    flex-direction: column;
-                    width: var(--gridSize);
-                    > li {
-                        height: 1.85rem;
-                        > a {
-                            height: 1.85rem;
-                            padding: 0.25rem 0;
-                            width: fit-content;
-                            color: var(--prBlack2);
-                            display: flex;
-                            flex-direction: row;
-                            gap: 0.5rem;
-                            align-items: center;
-                            transition: all var(--quickTransition) ease-in-out;
-                            transform: translateX(-1.3rem);
+            height: 100svh;
+            padding-block: var(--marS); /* see note below */
+            display: flex;
+            flex-direction: row;
+            gap: var(--marS);
 
-                            img{
-                                transform: rotate(165deg);
-                                opacity: 0;
-                                transition: all var(--quickTransition) ease-in-out;
-                            }
-                        }
-                    }
-                    > li.hovered {
-                        > a {
-                            color: var(--prBlack);
-                            transform: translateX(0rem);
-
-                            img{    
-                                transform: rotate(180deg);
-                                opacity: 1;
-                            }
-                        }
-                    }
-                }
-                
-            }
-            #projectPhrase {
-                width: calc(100% - (2 * var(--marM)));
-                max-width: 40rem;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                text-align: center;
-                z-index: 10;
-
+            #projectsL{
                 display: flex;
                 flex-direction: column;
-                align-items: center;
-                gap: 1.25rem;
+                gap: var(--marS);
 
                 img {
-                    width: 2rem;
-                    height: 2rem;
                     display: none;
-                    animation: pointHint 0.6s ease-in-out infinite alternate;
+                    min-height: 0;
+                    object-fit: cover;
+                    height: 100%;
+                    width: 100%;
+
+                    &.active {
+                        display: block;
+                    }
                 }
             }
+            
 
-            #projectToken {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                object-fit: cover;
-                z-index: 9;
-                pointer-events: none;
-                transform: translate(var(--tx), var(--ty)) rotate(var(--rot));
-                animation: slideIn 0.2s ease-out;
-                object-fit: contain;
-            }
-
-            #progressBar {
-                position: absolute;
-                bottom: calc(0px + var(--marS));
-                top: auto;
-                left: 50%;
-                transform: translate(-50%, 0);
-                text-align: center;
-                z-index: 11;
-                display: inline-flex;
-                gap: 0.5rem;
-                transition: all var(--vQuickTransition) ease-in-out;
-            }
-
-            #progressBar.hidden{
-                opacity: 0;
-                transform: translate(-50%, 0.25rem);
+            #projectsR{
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                gap: var(--marS);
             }
             
         }
     }
 
-    @media (min-width: 55rem) {
-        @media (max-height: 42rem) {
-            #projectsWrapper{
-                #projects{
-                    #projectPhrase {
-                        position: absolute;
-                        bottom: calc(var(--marM) + var(--marS));
-                        top: auto;
-                        left: 50%;
-                        transform: translate(-50%, 0);
-                        text-align: center;
-                        z-index: 10;
-                    }
-                }
+    #extras {
+
+        > div {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            #extrasLinks{
+                display: flex;
+                flex-direction: column;
+                align-items: end;
+                transform: translateY(calc(-1 * var(--lineThickness)));
+            }
+            h1 {
+                transform: translateY(calc(-1 * var(--lineThickness)));
+            }
+        }
+        
+    }
+
+    @media (max-width: 55rem) {
+
+        #projects {
+            flex-direction: column !important;
+            #projectsL{
+                height: 100%;
+                gap: var(--marXXS) !important;
             }
         }
     }
 
     @media (max-width: 62rem) {
-        #intro {
-            flex-direction: column;
-            gap: var(--marXS);
-            .introText {
-                text-align: center;
-                font-size: var(--tSize2);
-            }
 
-            #token{
-                width: 10rem;
-            }
-        }
-    }
-
-    @media (max-width: 55rem) {
-        #phrase { p {
-            font-size: var(--tSize2);
-        }}
-
-        #projects {
-            h1 {
-                margin-bottom: 0.5rem !important; 
-            }
-        }
-
-        #projectPhrase {
-            img {
-                display: block !important;
-            }
-        }
     }
 
     @keyframes slideIn {
@@ -619,18 +505,6 @@
         }
     }
 
-    @keyframes appear {
-        from {
-            transform: translateY(-0.25rem);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-
     @keyframes pointHint {
         from {
             transform: translateY(1rem);
@@ -638,5 +512,14 @@
         to {
             transform: translateY(0rem);
         }
+    }
+
+    @keyframes wiggle {
+    0%   { transform: rotate(0deg); }
+    12.5%  { transform: rotate(20deg); }
+    37.5%  { transform: rotate(-20deg); }
+    62.5%  { transform: rotate(20deg); }
+    87.5%  { transform: rotate(-20deg); }
+    99% { transform: rotate(0deg); }
     }
 </style>
