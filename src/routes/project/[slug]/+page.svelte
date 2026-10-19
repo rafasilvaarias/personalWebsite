@@ -352,6 +352,7 @@
 
     article > :global(.fauxContent) {
       margin-left: 0px;
+      width: 100%;
     }
 
     article :global(.gallery img),
