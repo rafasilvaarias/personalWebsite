@@ -318,7 +318,7 @@
             <h1 class="{ui.isMobile ? "tSize2" : "tSize3"} mbXS hideOnDesktop">Extras</h1>
             <hr />
             <div>
-                <h1 class="tSize2 serif mtXXS hideOnMobile">Extras</h1>
+                <h1 class="tSize2 mtXXS hideOnMobile">Extras</h1>
                 <div id="extrasLinks">
                     {#each extras as extra}
                         <LinkRow text={extra.name} link={extra.link} width={ui.isDesktop ? 3 : ui.isTablet ? 2 : ui.isMobile ? undefined : undefined} resize={true} />
