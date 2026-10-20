@@ -220,7 +220,7 @@
 		justify-content: space-between;
 		margin: var(--marB);
 		padding: var(--marXS);
-		border: 1.5px solid var(--prBlack);
+		border: var(--lineThickness) solid var(--prBlack);
 	}
 
 	@media (max-width: 68rem) {

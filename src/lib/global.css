@@ -76,7 +76,7 @@
 @media (max-width: 55rem) {
     :root{
         --isMobile: 1;
-        --marB: 1.6rem;
+        --marB: 1rem;
     }
 
     .hideOnMobile{

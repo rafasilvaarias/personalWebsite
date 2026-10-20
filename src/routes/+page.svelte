@@ -8,49 +8,40 @@
     import FishAnimation from '$lib/components/fishAnimation.svelte';
     import LinkRow from '$lib/components/linkRow.svelte';
     import RevealText from '$lib/components/revealText.svelte';
+    import ProjectDiv from '$lib/components/projectDiv.svelte';
 
-    // #region Projects
+    
     const projects = [
-        {
-            name: "Master's Dissertation",
-            link: '/project/mastersDissertation',
-            characteristics: ['Web Development', 'Music Artwork'],
-            year: "2026",
-            phrase: "Making generative music run and distribute on the web",
-            photo: '/projects/content/mdBanner.jpg',
-        },
         {
             name: 'Shift APPens',
             link: '/project/shiftAPPens',
-            characteristics: ['Visual Identity', 'Web Development', 'Design Tool Development'],
-            year: "2025/2026",
-            phrase: "How coding a design tool defined a visual identity",
-            photo: '/projects/content/saBanner.jpg',
-            photoSize: [-40, -30, 60]
+            info: "Web Development",
+            phrase: "A custom design tool",
+            photo: '/photos/projectBanners/sa.jpg',
         },
         {
             name: "RESE",
             link: '/project/rese',
-            characteristics: ['Service Design', 'Web Development', 'Visual Identity'],
-            year: "2024/2025",
-            phrase: "Solving the workflow of a ~60 people online radio station",
-            photo: '/projects/content/reseFestR.jpg',
-            photoSize: [-170, -10, 35]
+            info: "Web Design/Development",
+            phrase: "A radio web app",
+            photo: '/photos/projectBanners/rese.jpg',
         },
+        {
+            name: "Master's Dissertation",
+            link: '/project/mastersDissertation',
+            info: "Music, Web Development",
+            phrase: "Web-native music",
+            photo: '/photos/projectBanners/md.jpg',
+        },
+        
         {
             name: 'Festa das Latas',
             link: '/project/festaDasLatas',
-            characteristics: ['Visual Identity'],
-            year: "2024",
-            phrase: "A 30€ budget visual identity for a 25000 people festival",
-            photo: '/projects/content/flBanner.jpg',
-            photoSize: [-90, 10, 60]
+            info: "Communication Design",
+            phrase: "25000 person festival on a 30€ budget",
+            photo: '/photos/projectBanners/fl.jpg',
         },
     ];
-
-    // Stable arrays, so RevealText doesn't see a new `texts` on every render
-    const projectNames = projects.map((p) => p.name);
-    const projectPhrases = projects.map((p) => p.phrase);
 
     const extras = [
         {
@@ -62,37 +53,6 @@
             link: "https://www.youtube.com/@ComoCalha"
         }
     ]
-
-    let scrollY = $state(0);
-    let innerHeight = $state(0);
-
-    let sectionEl = $state<HTMLElement>();
-    let sectionTop = $state(0);
-    let scrollLength = $state(0);
-
-    $effect(() => {
-        if (!sectionEl) return;
-        sectionTop = sectionEl.getBoundingClientRect().top + window.scrollY;
-        scrollLength = sectionEl.offsetHeight - innerHeight; // re-runs on resize
-    });
-
-    let activeIndex = $derived(
-        scrollY < sectionTop || scrollLength <= 0
-            ? 0
-            : Math.min(
-                Math.floor((scrollY - sectionTop) / (scrollLength / projects.length)),
-                projects.length - 1
-            )
-    );
-    let projectProgress = $derived(
-        scrollY < sectionTop || scrollLength <= 0
-            ? 0
-            : Math.min(
-                (scrollY - sectionTop) / (scrollLength / projects.length),
-                projects.length
-            )
-    );
-    let slotProgress = $derived(Math.min(projectProgress - activeIndex, 1));
 
     // The projects block pins to the top at scrollY === sectionTop, which is
     // the moment the phrase is fully in view. Latches: never goes back to 0.
@@ -115,6 +75,7 @@
     });
 
     let shouldScroll = $state(false);
+    let hoveredProject : number | null = $state(null);
 
     $effect(() => {
         if (stage === 8 && shouldScroll) {
@@ -124,8 +85,23 @@
         }
     });
 
+    function portal(node: HTMLElement) {
+        document.body.appendChild(node);
+        return {
+            destroy() {
+                node.remove();
+            }
+        };
+    }
+
+    let m = $state({ x: 0, y: 0 });
+
+    function handleMousemove(event: any) {
+        m.x = event.clientX;
+        m.y = event.clientY;
+    }
+
     // 0 = hidden, otherwise 1-based project number
-    let projectSlot = $derived(revealed ? activeIndex + 1 : 0);
 
     
 	// #region Intro
@@ -237,7 +213,7 @@
 	// #endregion
 </script>
 
-<svelte:window bind:scrollY bind:innerHeight />
+<svelte:window />
 
 <main>
     <div id="intro">
@@ -277,6 +253,10 @@
         </p>
     </div>
 
+    {#if hoveredProject !== null}
+        <p id="projectPhrase" style="--x: {m.x}px; --y: {m.y}px" use:portal> <RevealText texts={[projects[hoveredProject].phrase]} duration={500} stagger={30}>  </RevealText></p>
+    {/if}
+
     <div id="slideIn">
         <hr id="topLine"/>
         <div id="phrase" class="mbS">
@@ -294,24 +274,17 @@
             <FishAnimation/>
         </div>
 
-        <div id="projectsWrapper" class="{ui.isMobile ? "mbM" : "mbL" }" bind:this={sectionEl}>
-            <div id="projects">
-                <div id="projectsL" class="{ui.isMobile ? "" : ui.isTablet ? "gridW g2" : "gridW g3"}">
-                    <div>
-                        <RevealText tag="h1" class="projectsHeading tSize1 {ui.isMobile ? "" : "mbXXS"}" delay={75} active={revealed ? 1 : 0}>Selected Projects</RevealText>
-                        <RevealText tag="h2" class="projectsName {ui.isMobile ? "mbXXS tSize15" : "mbXS tSize2"}" delay={150} texts={projectNames} active={projectSlot} />
-                    </div>
-                    {#each projects as project, i}
-                        <img  src={project.photo} alt="" aria-hidden="true" class:active={i === activeIndex}>
-                    {/each}
+        <div id="projects" class="mbL" onmousemove={handleMousemove}>
+            {#each projects as project, index}
+                <div
+                    class="projectWrapper"
+                    role="presentation"
+                    onmouseenter={() => (hoveredProject = index)}
+                    onmouseleave={() => (hoveredProject = null)}
+                >
+                    <ProjectDiv project={project}/>
                 </div>
-                <div id="projectsR" class="{ui.isMobile ? "" : ui.isTablet ? "gridW g1" : "gridW g2"}">
-                    <div bind:this={phraseEl}>
-                        <RevealText class="{!ui.isDesktop ? "tSize2" : "tSize3"}" texts={projectPhrases} active={projectSlot} />
-                    </div>
-                    <LinkRow text="See Project" link={projects[activeIndex].link} width={ui.isMobile ? undefined : 1} progress={slotProgress} />
-                </div>
-            </div>
+            {/each}
         </div>
 
         <div id="extras" class="mbL">
@@ -413,51 +386,83 @@
         }
     }
 
+    #projects{
+        display: flex;
+        flex-direction: row;
+        gap: var(--marS);
+        flex-wrap: wrap;
+
+        
+        :global(.projectWrapper){
+            width: calc(2*var(--gridSize) + var(--marS));
+            height: fit-content;
+
+            &:nth-child(3) {
+                margin-left: calc(var(--gridSize) + var(--marS));
+            }
+
+            :global(.project){
+                width: calc(2*var(--gridSize) + var(--marS));
+                height: fit-content;
+                :global(img){
+                width: 100%;
+            }
+                :global(.projectInfo){
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                }
+            }
+
+            
+            
+
+            
+        }
+    }
+
+    #projectPhrase {
+        position: fixed;
+        top: var(--y);
+        left: var(--x);
+        z-index: 0;
+        pointer-events: none;
+
+        /* look */
+        background-color: var(--prBlack);
+        color: var(--prWhite);
+        
+        line-height: 1.3;
+        text-align: center;
+        padding: 0.5em 0.9em;
+        border-radius: 999px;          /* pill; use 0.5rem for a softer rectangle */
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+        /* layout */
+        width: fit-content;
+        text-wrap: balance;
+
+        white-space: nowrap;
+
+        /* sit just below-right of the cursor instead of on top of it */
+        translate: var(--marXXS) var(--marXXS);
+
+        /* entrance */
+        transform-origin: top left;
+        animation: phraseIn 150ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    @keyframes phraseIn {
+        from { opacity: 0; scale: 0.92; }
+        to   { opacity: 1; scale: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #projectPhrase { animation: none; }
+    }
 
     #phrase {
         position: relative;
-    }
-
-    #projectsWrapper {
-    height: 400svh;
-    position: relative;
-
-        #projects {
-            position: sticky;
-            top: 0;
-            height: 100svh;
-            padding-block: var(--marS); /* see note below */
-            display: flex;
-            flex-direction: row;
-            gap: var(--marS);
-
-            #projectsL{
-                display: flex;
-                flex-direction: column;
-                gap: var(--marS);
-
-                img {
-                    display: none;
-                    min-height: 0;
-                    object-fit: cover;
-                    height: 100%;
-                    width: 100%;
-
-                    &.active {
-                        display: block;
-                    }
-                }
-            }
-            
-
-            #projectsR{
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                gap: var(--marS);
-            }
-            
-        }
     }
 
     #extras {
@@ -480,18 +485,18 @@
     }
 
     @media (max-width: 55rem) {
-
-        #projects {
-            flex-direction: column !important;
-            #projectsL{
-                height: 100%;
-                gap: var(--marXXS) !important;
-            }
-        }
+        #projects { .projectWrapper {
+                width: 100% !important;
+        }}
     }
 
-    @media (max-width: 62rem) {
-
+    @media (max-width: 68rem) {
+        #projects { .projectWrapper {
+            &:nth-child(2), &:nth-child(3) {
+                margin-left: 0px;
+                width: var(--gridSize);
+            }
+        }}
     }
 
     @keyframes slideIn {
