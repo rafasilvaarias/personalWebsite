@@ -217,7 +217,7 @@
 
 <main>
     <div id="intro">
-        <p class="introLine {ui.isDesktop ? 'tSize3' : ui.isTablet ? 'tSize2' : 'tSize15'} serif textCenter">
+        <p class="introLine {ui.isDesktop ? 'tSize3' : ui.isTablet ? 'tSize2' : 'tSize15'} textCenter">
             <span class="collapse" style:width={leadWidth}>
                 <span class="collapseInner lead" bind:clientWidth={leadW}>
                     <RevealText tag="span" duration={600} active={hiActive}>Hi!</RevealText>
@@ -245,7 +245,7 @@
                             <img class={iconSize} id="token" src="/photos/token.webp" alt="gold token animation" />
                         </RevealText>
                         <RevealText duration={600} tag="span" class="sans" active={trailActive} delay={100}>
-                            {ui.isMobile ? '' : 'Web '}Designer/Developer
+                            Designer/Developer
                         </RevealText>
                     </span>
                 </span>
@@ -289,9 +289,12 @@
 
         <div id="extras" class="mbL">
             <h1 class="{ui.isMobile ? "tSize2" : "tSize3"} mbXS hideOnDesktop">Extras</h1>
-            <hr />
+            
             <div>
-                <h1 class="tSize2 mtXXS hideOnMobile">Extras</h1>
+                <div id="extrasTitle" class="hideOnMobile">
+                    <hr />
+                    <h1 class="tSize2 mtXXS">Extras</h1>
+                </div>
                 <div id="extrasLinks">
                     {#each extras as extra}
                         <LinkRow text={extra.name} link={extra.link} width={ui.isDesktop ? 3 : ui.isTablet ? 2 : ui.isMobile ? undefined : undefined} resize={true} />
@@ -374,7 +377,7 @@
             position: absolute;
             top: 0px;
             left: 0px;
-            height: 1px;
+            height: var(--lineThickness);
             background-color: var(--prBlack3);
         }
 
@@ -471,14 +474,17 @@
             display: flex;
             flex-direction: row;
             justify-content: space-between;
+
+            #extrasTitle {
+                display: flex;
+                flex-direction: column;
+                align-items: start;
+                width: 100%;
+            }
             #extrasLinks{
                 display: flex;
                 flex-direction: column;
                 align-items: end;
-                transform: translateY(calc(-1 * var(--lineThickness)));
-            }
-            h1 {
-                transform: translateY(calc(-1 * var(--lineThickness)));
             }
         }
         

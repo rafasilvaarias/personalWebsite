@@ -9,7 +9,7 @@
 
 <div class="headerWrapper">
     <div class="header">
-        <a class="underline tSize1" href="/"> Home </a>
+        <a class="tSize1" href="/"> Home </a>
     </div>
 </div>
 
@@ -25,7 +25,7 @@
     width: 100%;
     display: flex;
     flex-direction: row;
-    padding: 0px 2rem;
+    padding: 0px var(--marB);
     align-items: center;
   }
 }

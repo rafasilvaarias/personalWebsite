@@ -49,7 +49,7 @@
         width: fit-content;
         height: fit-content;
         box-sizing: border-box;
-        border: 1.5px solid var(--prBlack);
+        border: var(--lineThickness) solid var(--prBlack2);
         padding: var(--marXXS, 0.5rem);
         color: inherit;
         text-decoration: none;

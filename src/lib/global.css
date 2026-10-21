@@ -1,16 +1,6 @@
 @font-face {
   font-family: 'prSans';
-  src: url('/fonts/HedvigLettersSans-Regular.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'prSerif';
-  src: url('/fonts/HedvigLettersSerif_14pt-Regular.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'Arial';
-    src: url('/fonts/ARIAL.TTF') format('truetype');
+  src: url('/fonts/Inter_24pt-Regular.ttf') format('truetype');
 }
 
 :root {
@@ -42,7 +32,7 @@
     --size-5: 6.5536rem;
     --icon-scale: 0.77;
 
-    --lineThickness: 1.5px;
+    --lineThickness: 0.5px;
 
     --vQuickTransition: 0.1s;
     --quickTransition: 0.2s;
@@ -174,17 +164,9 @@ button {
 .mtXS  { margin-top: var(--marXS); }
 .mtXXS { margin-top: var(--marXXS); }
 
-.serif {
-    font-family: 'prSerif', serif;
-}
-
-.sans {
-    font-family: 'prSans', sans-serif;
-}
-
 .underline {
-  text-decoration: underline dotted;
-  text-decoration-thickness: 2px;
+  text-decoration: underline solid;
+  text-decoration-thickness: var(--lineThickness);
   text-underline-offset: 15%;
 }
 

@@ -158,7 +158,7 @@
   :global(.info){
     display: flex;
     flex-direction: row;
-    border: 1px solid var(--prBlack);
+    border: var(--lineThickness) solid var(--prBlack3);
     width: fit-content;
     margin-bottom: var(--marS);
 
@@ -167,13 +167,13 @@
       flex-direction: column;
 
       &:not(:first-child) {
-        border-left: 1px solid var(--prBlack);
+        border-left: var(--lineThickness) solid var(--prBlack3);
       }
 
       :global(.label) {
         font-size: var(--size-05);
         color: var(--prBlack2);
-        border-bottom: 1px solid var(--prBlack);
+        border-bottom: var(--lineThickness) solid var(--prBlack3);
       }
 
       :global(.label), :global(.value) {
@@ -208,7 +208,7 @@
 
   article :global(.logicChain .blocks) {
     padding: var(--marXXS);
-    border: 1px solid var(--prBlack3);
+    border: var(--lineThickness) solid var(--prBlack3);
     flex: 1;
     min-width: 0;
     display: flex;
@@ -301,7 +301,7 @@
 
   article :global(a) {
     text-decoration: underline dotted;
-    text-decoration-thickness: 2px;
+    text-decoration-thickness: var(--lineThickness);
     text-underline-offset: 15%;
     cursor: ne-resize;
   }
