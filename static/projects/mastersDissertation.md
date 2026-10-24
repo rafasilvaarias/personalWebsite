@@ -17,5 +17,5 @@ The platform's design will follow expected interactions, or break them, whicheve
 The music is semi-stochastic. [Seeds](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) make each playthrough replayable, but never identical. Macro parameters like project duration shift between plays. So do small things like a rhythmic fill, a melodic turn. 
 
 # Demo
-Try an early demo [here](https://md.rafasilvaarias.com/listen). It's my first test of making music with the tools I've built. I'm not contempt with the result, I think the aesthetic of the piece is not matching its environment. The final artwork will be different. The platform itself is working well.
+Try an early demo [here](https://md.rafasilvaarias.com/listen). 
 
