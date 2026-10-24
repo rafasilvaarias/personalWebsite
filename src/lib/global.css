@@ -165,7 +165,7 @@ button {
 .mtXXS { margin-top: var(--marXXS); }
 
 .underline {
-  text-decoration: underline solid;
+  text-decoration: underline dotted;
   text-decoration-thickness: var(--lineThickness);
   text-underline-offset: 15%;
 }
